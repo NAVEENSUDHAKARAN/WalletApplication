@@ -7,16 +7,15 @@ import org.springframework.jdbc.core.RowMapper;
 
 import com.chainsys.walletapplication.model.Users;
 
-public class Mapper implements RowMapper<Users>{
+public class CheckLogin implements RowMapper<Users> {
 
 	@Override
 	public Users mapRow(ResultSet rs, int rowNum) throws SQLException {
 		Users users = new Users();
-		users.setFirstName(rs.getString("first_name"));
-		users.setLastName(rs.getString("last_name"));
-		users.setPassword(rs.getString("password"));
 		users.setEmail(rs.getString("email"));
-		System.err.println("from mapper ---> " + users.getEmail());
+		users.setPassword("password");
 		return users;
 	}
+
+	
 }

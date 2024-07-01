@@ -89,14 +89,13 @@
     <div class="container">
         <img id="logo" alt="logo not working" src="images/DigiPayLogo.png" width="40px" height="40px" >
         <h2>Login</h2>
-        <form id="loginForm" action="LandingPage" method="post">
-            <input type="hidden" name="action" value="logIN" >
+        <form id="loginForm" action="Login" method="post">
             <input type="text" id="email" name="email" placeholder="Email" required><br>
             <input type="password" name="loginPassword" placeholder="Password" required><br>
             <input type="submit" value="Login">
         </form>
         <br>
-        <a id="createAccountTag" href="Register.jsp" >Create Account</a>
+        <a id="createAccountTag" href="Register.jsp" >Create Account?</a>
         
         
         <% String errorMessage = (String)request.getAttribute("error");

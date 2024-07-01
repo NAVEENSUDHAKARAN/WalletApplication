@@ -27,17 +27,17 @@
 	}
 </style>
 <body>
-	<% 
-		String receiverId = request.getParameter("recId");
-	
-		ServerManager manager = new ServerManager();
+	<%
+	String receiverId = request.getParameter("recId");
+		
+			WalletImpl manager = new WalletImpl();
 
-    List<WalletIdInfo> walletInfo = manager.readWalletDetails(receiverId);
-    for(WalletIdInfo details : walletInfo){
-    	byte[] imageData = details.getImage(); 
-        if (imageData != null) {
-            String base64Image = java.util.Base64.getEncoder().encodeToString(imageData);
-		%>
+	    List<WalletIdInfo> walletInfo = manager.readWalletDetails(receiverId);
+	    for(WalletIdInfo details : walletInfo){
+	    	byte[] imageData = details.getImage(); 
+	        if (imageData != null) {
+	            String base64Image = java.util.Base64.getEncoder().encodeToString(imageData);
+	%>
 			<div id="image">
 				<img id="qrcode" alt="not working" src="data:image/png;base64,<%= base64Image %>">
 			</div>

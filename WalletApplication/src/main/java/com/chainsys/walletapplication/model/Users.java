@@ -1,10 +1,19 @@
 package com.chainsys.walletapplication.model;
 
 public class Users {
+	int userId;
 	String firstName;
 	String lastName;
 	String email;
 	String password;
+
+	public int getUserId() {
+		return userId;
+	}
+
+	public void setUserId(int userId) {
+		this.userId = userId;
+	}
 
 	public String getFirstName() {
 		return firstName;

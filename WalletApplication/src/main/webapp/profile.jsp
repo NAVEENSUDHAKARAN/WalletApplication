@@ -1,8 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.chainsys.model.UserInfo" %>
-<%@ page import="com.chainsys.model.BankAccountInfo" %>
-<%@ page import="com.chainsys.model.CardInfo" %>
-<%@ page import="com.chainsys.dao.ServerManager" %>
+<%@ page import="com.chainsys.walletapplication.model.Users" %>
+<%@ page import="com.chainsys.walletapplication.model.BankAccounts" %>
+<%@ page import="com.chainsys.walletapplication.model.Cards" %>
+<%@ page import="com.chainsys.walletapplication.dao.WalletImpl" %>
 <%@ page import="java.util.List" %>
 <html>
 <head>
@@ -447,11 +447,11 @@ body {
     <div class="container rounded bg-white mt-2 mb-2"  style="box-shadow: 0 0 10px 5px #3c455c; height: 95vh;">
     <%
     HttpSession id = request.getSession(); 
-    int userId = (int) id.getAttribute("userid");
-    System.out.println("id ---> " + userId);
-    ServerManager server = new ServerManager();
-    List<UserInfo> arrList = server.readUserDetails(userId);
-    for (UserInfo userInfo : arrList) {
+        int userId = (int) id.getAttribute("userid");
+        System.out.println("id ---> " + userId);
+        WalletImpl server = new WalletImpl();
+        List<Users> arrList = server.readUserDetails(userId);
+        for (Users userInfo : arrList) {
     %>
         <div class="row">
             <div class="col-md-3 border-right">
@@ -478,8 +478,8 @@ body {
                     </div>
             <%} %>
             <% 
-			    List<BankAccountInfo> arrList1 = server.readAccountDetails(userId);
-			    for (BankAccountInfo bankAccountInfo : arrList1) { 
+			    List<BankAccounts> arrList1 = server.readAccountDetails(userId);
+			    for (BankAccounts bankAccountInfo : arrList1) { 
 			%>
                     <div class="row mt-3">
                         <div class="col-md-12">
@@ -528,8 +528,8 @@ body {
             <div id="name_mock" class="size-md pb-sm uppercase ellipsis snipcss0-3-4-5" style="">Mr. <%= userName %></div>
         </strong>
         <% 
-        	List<CardInfo> cardDetails = server.readCardDetails(userId);
-            for(CardInfo cardInfo : cardDetails){
+        	List<Cards> cardDetails = server.readCardDetails(userId);
+            for(Cards cardInfo : cardDetails){
         %>
         <div class="size-md pb-md snipcss0-2-3-6">
             <strong class="snipcss0-3-6-7">

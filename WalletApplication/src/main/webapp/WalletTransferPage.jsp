@@ -134,9 +134,9 @@
 </head>
 <body>
 <%
-    int id = Integer.parseInt(request.getParameter("id"));
+int id = Integer.parseInt(request.getParameter("id"));
     System.out.println("parsed Value : " + id);
-    ServerManager manager = new ServerManager();
+    WalletImpl manager = new WalletImpl();
 %>
 <div class="main-container">
     <div class="left-container">

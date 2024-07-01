@@ -89,13 +89,12 @@
     <h2>User Profile</h2>
     <%
     HttpSession id = request.getSession(); 
-    int userId = (int) id.getAttribute("userid");
-    System.out.println("id ---> " + userId);
-    ServerManager server = new ServerManager();
-    List<UserInfo> arrList = server.readUserDetails(userId);
-    for (UserInfo userInfo : arrList) {
-       
-%>
+        int userId = (int) id.getAttribute("userid");
+        System.out.println("id ---> " + userId);
+        WalletImpl server = new WalletImpl();
+        List<UserInfo> arrList = server.readUserDetails(userId);
+        for (UserInfo userInfo : arrList) {
+    %>
 		<label for="email">First Name:</label>
         <input type="text" id="email" name="firstName" value="<%= userInfo.getFirstName() %>" readonly>
         

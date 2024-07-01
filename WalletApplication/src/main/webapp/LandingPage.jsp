@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"%>
-<%@ page import="com.chainsys.walletapplication.dao.ServerManager" %>
+<%@ page import="com.chainsys.walletapplication.dao.WalletImpl" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -450,14 +450,14 @@ opacity: 100%;
 
 	<%
 	if (session == null) {
-		response.sendRedirect("LoginPage.jsp");
-		
-	}
-  	response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
+			response.sendRedirect("LoginPage.jsp");
+			
+		}
+	response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
 	response.setHeader("Pragma", "no-cache"); 
 	response.setHeader("Expires", "0");
-	
-	ServerManager manager = new ServerManager();
+		
+		WalletImpl manager = new WalletImpl();
 	%>
 
 	<div id="navbarDiv">
@@ -479,11 +479,14 @@ opacity: 100%;
 				<%} else{  
 					HttpSession id = request.getSession();
 					int userId = (int) id.getAttribute("userid");
+					System.out.println("from landing jsp : " + userId);
+					System.out.println("from landing jsp : " + manager.getWalletBalance(userId));
+					
 				%>
 						<div id="walletBalanceDiv">
 							<span style="font-size: medium;small;">WalletBalance</span><br>
-<%-- 							<img alt="walleticon not working" src="images/walleticon.png" width="35px" height="35px"><input type="text" name="walletBalance" style="width: 130px; position:relative; border:none; left: 10px;" value="<%= manager.getWalletBalance(userId) %>" readonly="readonly" >
- --%>						</div>	
+							<img alt="walleticon not working" src="images/walleticon.png" width="35px" height="35px"><input type="text" name="walletBalance" style="width: 130px; position:relative; border:none; left: 10px;" value="<%= manager.getWalletBalance(userId) %>" readonly="readonly" >
+ 						</div>	
 				<%} %>
 				<%-- <p id="welcomeNote" >Hi, <%= session.getAttribute("userName") %></p> --%>
 				<%

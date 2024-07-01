@@ -96,12 +96,11 @@
 <body>
     <div class="container">
     		<%
- 				int id = Integer.parseInt(request.getParameter("id"));
-    			String receiverId = request.getParameter("walletId");
- 				System.out.println("parsed Value in mobile : " + id);
-                ServerManager manager = new ServerManager();
-           
-             %>
+    		int id = Integer.parseInt(request.getParameter("id"));
+    		    			String receiverId = request.getParameter("walletId");
+    		 				System.out.println("parsed Value in mobile : " + id);
+    		                WalletImpl manager = new WalletImpl();
+    		%>
         <h2>Wallet Transfer</h2>
         <form action="Transfers" method="post">
         	<input type="hidden" name="action" value="mobileTransfer" >

@@ -74,11 +74,12 @@
     <div class="container">
         <h1>Send Money</h1>
 
-        <% HttpSession transfers = request.getSession();
-           int id = (int) transfers.getAttribute("userid");
-           ServerManager manager = new ServerManager();
-           List<UserInfo> userDetails = manager.readUserDetails(id);
-           for(UserInfo user : userDetails) {
+        <%
+        HttpSession transfers = request.getSession();
+                   int id = (int) transfers.getAttribute("userid");
+                   WalletImpl manager = new WalletImpl();
+                   List<UserInfo> userDetails = manager.readUserDetails(id);
+                   for(UserInfo user : userDetails) {
         %>
         <form action="Transfers" method="post">
         <input type="hidden" name="action" value="accountTransfer" > 
