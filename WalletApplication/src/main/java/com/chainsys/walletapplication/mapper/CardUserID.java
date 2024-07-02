@@ -5,10 +5,11 @@ import java.sql.SQLException;
 
 import org.springframework.jdbc.core.RowMapper;
 
-public class GetUserName implements RowMapper<String> {
+public class CardUserID implements RowMapper<Integer>{
 
 	@Override
-	public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-		return rs.getString("first_name");
+	public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+		return rs.getInt("user_id");
 	}
+
 }

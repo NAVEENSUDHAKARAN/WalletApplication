@@ -1,3 +1,5 @@
+<%@page import="org.springframework.web.context.support.WebApplicationContextUtils"%>
+<%@page import="org.springframework.context.ApplicationContext"%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.chainsys.walletapplication.model.Users" %>
 <%@ page import="com.chainsys.walletapplication.model.BankAccounts" %>
@@ -450,7 +452,9 @@ body {
         int userId = (int) id.getAttribute("userid");
         System.out.println("id ---> " + userId);
         WalletImpl server = new WalletImpl();
-        List<Users> arrList = server.readUserDetails(userId);
+     	ApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+     	WalletImpl walletImpl = (WalletImpl) context.getBean("walletImpl");
+     	List<Users> arrList = walletImpl.readUserDetails(userId);
         for (Users userInfo : arrList) {
     %>
         <div class="row">
@@ -478,7 +482,7 @@ body {
                     </div>
             <%} %>
             <% 
-			    List<BankAccounts> arrList1 = server.readAccountDetails(userId);
+			    List<BankAccounts> arrList1 =  (List<BankAccounts>) id.getAttribute("accountDetails");
 			    for (BankAccounts bankAccountInfo : arrList1) { 
 			%>
                     <div class="row mt-3">
@@ -516,19 +520,20 @@ body {
            <%} %> 
 
 			<%
-				if(server.getUserIdFromCards(userId)){
+				if((boolean) id.getAttribute("userIdFromCards")){
 			%>	
 			<div id="debitCard" class="card-mockup flex-vertical snipcss0-0-0-1 snipcss-c6oPp">
 		    <img id="logo" src="images/DigiPayNoBG.png" alt="logo" height="40px" width="40px" ><br>
 		    <div class="snipcss0-1-1-3">
     	<%
-    		String userName = server.getUserName(userId);
+    	for (Users userInfo : arrList) {
+    	    		String userName = userInfo.getFirstName();
     	%>
         <strong class="snipcss0-2-3-4">
             <div id="name_mock" class="size-md pb-sm uppercase ellipsis snipcss0-3-4-5" style="">Mr. <%= userName %></div>
         </strong>
-        <% 
-        	List<Cards> cardDetails = server.readCardDetails(userId);
+        <% }
+        	List<Cards> cardDetails =(List<Cards>) id.getAttribute("cardDetails");
             for(Cards cardInfo : cardDetails){
         %>
         <div class="size-md pb-md snipcss0-2-3-6">

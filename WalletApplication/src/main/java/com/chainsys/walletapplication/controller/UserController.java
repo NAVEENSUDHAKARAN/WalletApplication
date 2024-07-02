@@ -25,6 +25,9 @@ public class UserController {
 	@Autowired
 	WalletImpl manager;
 
+	@Autowired
+	Users users;
+	
 	@RequestMapping("/")
 	public String home() {
 		return "LandingPage.jsp";
@@ -35,9 +38,7 @@ public class UserController {
 			@RequestParam("email") String email, @RequestParam("phoneNumber") String phoneNumber,
 			@RequestParam("password") String password, @RequestParam("dateOfBirth") String dateOfBirth,
 			@RequestParam("aadhaarNumber") long aadhaarNumber, @RequestParam("panNumber") String panNumber,
-			@RequestParam("residentialAddress") String residentialAddress, Model model)
-			throws ClassNotFoundException, SQLException {
-		Users users = new Users();
+			@RequestParam("residentialAddress") String residentialAddress, Model model) {
 		BankAccounts account = new BankAccounts();
 		users.setFirstName(fName);
 		users.setLastName(lName);
@@ -62,13 +63,19 @@ public class UserController {
 	@PostMapping("/Login")
 	public String login(@RequestParam("email") String mail, @RequestParam("loginPassword") String password,
 			HttpSession session, Model model) {
-		Users user = new Users();
-		user.setEmail(mail);
-		user.setPassword(password);
+		users.setEmail(mail);
+		users.setPassword(password);
 
 		if (manager.checkLogin(mail, password)) {
-			session.setAttribute("userName", manager.getUserName(user));
-			session.setAttribute("userid", manager.getUserID(user));
+			session.setAttribute("userName", manager.getUserName(users));
+			session.setAttribute("userid", manager.getUserID(users));
+			int userId = manager.getUserID(users);
+			System.err.println("[[["+manager.getWalletBalance(userId)+"]]]");
+			model.addAttribute("walletBalance"+ manager.getWalletBalance(userId));
+			session.setAttribute("userDetails", manager.readUserDetails(userId));
+			session.setAttribute("accountDetails", manager.readAccountDetails(userId));
+			session.setAttribute("userIdFromCards", manager.getUserIdFromCards(userId));
+			session.setAttribute("cardDetails", manager.readCardDetails(userId));
 			return "redirect:/LandingPage.jsp";
 		} else {
 			model.addAttribute("error", "Invalid Email or Password");
@@ -78,14 +85,13 @@ public class UserController {
 	}
 	
 	@PostMapping("/Logout")
-	public String logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	public String logout(HttpServletRequest request, HttpServletResponse response) {
 		HttpSession session = request.getSession(false);
 		
 		if(session != null)
 		{
 			 session.invalidate();
 		}
-		return "redirect:/LandingPage.jsp";
-		
+		return "redirect:/LandingPage.jsp";	
 	}
 }

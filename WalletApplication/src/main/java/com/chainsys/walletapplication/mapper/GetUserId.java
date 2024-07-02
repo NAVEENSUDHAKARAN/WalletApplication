@@ -11,7 +11,7 @@ public class GetUserId implements RowMapper<Integer> {
 
 	@Override
 	public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
-		return  rs.getInt("user_id");
+		return rs.getInt("user_id");
 	}
 
 }

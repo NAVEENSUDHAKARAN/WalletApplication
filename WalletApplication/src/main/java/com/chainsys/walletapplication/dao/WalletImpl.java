@@ -14,16 +14,21 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.chainsys.walletapplication.mapper.AccountDetail;
+import com.chainsys.walletapplication.mapper.CardDetails;
+import com.chainsys.walletapplication.mapper.CardUserID;
 import com.chainsys.walletapplication.mapper.CheckLogin;
 import com.chainsys.walletapplication.mapper.GetUserId;
 import com.chainsys.walletapplication.mapper.GetUserName;
 import com.chainsys.walletapplication.mapper.GetWalletBalance;
-import com.chainsys.walletapplication.mapper.Mapper;
+import com.chainsys.walletapplication.mapper.UserDetails;
 import com.chainsys.walletapplication.model.BankAccounts;
 import com.chainsys.walletapplication.model.Cards;
 import com.chainsys.walletapplication.model.Transactions;
 import com.chainsys.walletapplication.model.Users;
 import com.chainsys.walletapplication.model.Wallets;
+
+import jakarta.servlet.http.HttpSession;
 
 @Repository
 public class WalletImpl implements WalletDAO {
@@ -111,17 +116,18 @@ public class WalletImpl implements WalletDAO {
 
 	public Users getUserIDFromAccountTable(Users user) {
 		String query = "SELECT user_id FROM users WHERE email = ?";
-		return jdbcTemplate.queryForObject(query, new Mapper(), user.getEmail());
+		return jdbcTemplate.queryForObject(query, new UserDetails(), user.getEmail());
 	}
 	
-	public boolean getUserIdFromCards(int userId) throws ClassNotFoundException, SQLException {
+	public boolean getUserIdFromCards(int userId) {
 		String query = "select user_id from cards where user_id = ?";
-		return jdbcTemplate.queryForObject(query, new Mapper(), userId) != null;
+		System.err.println("in getUserIdFromCards" + userId);
+		return jdbcTemplate.queryForObject(query, new CardUserID(), userId) != 0;
 	}
 
 	public boolean checkUserId(int id) {
 		String query = "SELECT user_id FROM bank_accounts WHERE user_id = ?";
-		return jdbcTemplate.queryForObject(query, new Mapper(), id) != null;
+		return jdbcTemplate.queryForObject(query, new UserDetails(), id) != null;
 	}
 
 	public void createAccount(BankAccounts detail, int id) {
@@ -136,7 +142,7 @@ public class WalletImpl implements WalletDAO {
 		return jdbcTemplate.queryForObject(query, new GetUserName(), user.getEmail());
 	}
 	
-	public String getUserName(int id) throws ClassNotFoundException, SQLException {
+	public String getUserName(int id) {
 		String query = "SELECT first_name FROM users WHERE user_id = ?";
 		return jdbcTemplate.queryForObject(query, new GetUserName(), id);
 	}
@@ -154,27 +160,26 @@ public class WalletImpl implements WalletDAO {
 	public List<Users> readUserDetails(int id) {
 		System.out.println("read details --->" + id);
 		String query = "SELECT user_id, first_name, last_name, password, email FROM users WHERE user_id = ?";
-		return jdbcTemplate.query(query, new Mapper(), id);
+		return jdbcTemplate.query(query, new UserDetails(), id);
+	
 	}
 	
 	public List<BankAccounts> readAccountDetails(int id) {
-		List<BankAccounts> accountDetailsList = new ArrayList<>();
 		String query = "SELECT user_id, account_number, phonenumber, dateofbirth, aadhaarnumber, residential_address, balance FROM bank_accounts WHERE user_id = ?";
-		jdbcTemplate.query(query, new Mapper(), id);
-		return accountDetailsList;
+		return jdbcTemplate.query(query, new AccountDetail(), id);
 	}
 	
-	public List<Wallets> readWalletDetails(int id) throws ClassNotFoundException {
+	public List<Wallets> readWalletDetails(int id) {
 		List<Wallets> walletDetailsList = new ArrayList<>();
 		String query = "SELECT wallet_id, user_id, balance, qr FROM wallets WHERE user_id = ?";
-		jdbcTemplate.query(query, new Mapper(), id);
+		jdbcTemplate.query(query, new UserDetails(), id);
 		return walletDetailsList;
 	}
 	
 	public List<Wallets> readWalletDetails(String walletId) throws ClassNotFoundException {
 		List<Wallets> walletDetailsList = new ArrayList<>();
 		String query = "SELECT wallet_id, user_id, balance, qr FROM wallets WHERE wallet_id = ?";
-		jdbcTemplate.query(query, new Mapper(), walletId);
+		jdbcTemplate.query(query, new UserDetails(), walletId);
 		return walletDetailsList;
 	}
 	
@@ -182,15 +187,13 @@ public class WalletImpl implements WalletDAO {
 		List<Transactions> historyDetailsList = new ArrayList<>();
 		String query = "SELECT transaction_id, sender_wallet_id, receiver_wallet_id, DataAndTime, amount "
 				+ "FROM transactions WHERE sender_wallet_id = ? ORDER BY DataAndTime DESC";
-		jdbcTemplate.query(query, new Mapper(), walletId);
+		jdbcTemplate.query(query, new UserDetails(), walletId);
 		return historyDetailsList;
 	}
 	
-	public List<Cards> readCardDetails(int userId) throws ClassNotFoundException {
-		List<Cards> cardDetailsList = new ArrayList<>();
-		String query = "select * from cards where user_id = ?";
-		jdbcTemplate.query(query, new Mapper(), userId);
-		return cardDetailsList;
+	public List<Cards> readCardDetails(int userId) {
+		String query = "select user_id, cardnumber, applied_date, expiry_date, cvv, pin from cards where user_id = ?";
+		return jdbcTemplate.query(query, new CardDetails(), userId);
 	}
 
 }
