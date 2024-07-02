@@ -70,9 +70,6 @@ public class UserController {
 			session.setAttribute("userName", manager.getUserName(users));
 			session.setAttribute("userid", manager.getUserID(users));
 			int userId = manager.getUserID(users);
-			System.err.println("[[["+manager.getWalletBalance(userId)+"]]]");
-			model.addAttribute("walletBalance"+ manager.getWalletBalance(userId));
-			session.setAttribute("userDetails", manager.readUserDetails(userId));
 			session.setAttribute("accountDetails", manager.readAccountDetails(userId));
 			session.setAttribute("userIdFromCards", manager.getUserIdFromCards(userId));
 			session.setAttribute("cardDetails", manager.readCardDetails(userId));
@@ -82,6 +79,13 @@ public class UserController {
 			return "LoginPage.jsp";
 		}
 
+	}
+	
+	@PostMapping("CreateAccount")
+	public String createAccount(@RequestParam("accountNumber") String accountNumber, @RequestParam("amount") double amount, 
+			@RequestParam("password") String password) {
+		
+		return "";
 	}
 	
 	@PostMapping("/Logout")

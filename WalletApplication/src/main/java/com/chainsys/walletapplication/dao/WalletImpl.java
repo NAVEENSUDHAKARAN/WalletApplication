@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -15,9 +16,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.chainsys.walletapplication.mapper.AccountDetail;
+import com.chainsys.walletapplication.mapper.AccountNumber;
 import com.chainsys.walletapplication.mapper.CardDetails;
 import com.chainsys.walletapplication.mapper.CardUserID;
 import com.chainsys.walletapplication.mapper.CheckLogin;
+import com.chainsys.walletapplication.mapper.CheckPassword;
 import com.chainsys.walletapplication.mapper.GetUserId;
 import com.chainsys.walletapplication.mapper.GetUserName;
 import com.chainsys.walletapplication.mapper.GetWalletBalance;
@@ -194,6 +197,29 @@ public class WalletImpl implements WalletDAO {
 	public List<Cards> readCardDetails(int userId) {
 		String query = "select user_id, cardnumber, applied_date, expiry_date, cvv, pin from cards where user_id = ?";
 		return jdbcTemplate.query(query, new CardDetails(), userId);
+	}
+	
+	public boolean checkAccountNumber(int id, String accNo){
+		String query = "SELECT account_number FROM bank_accounts WHERE user_id = ?";
+		return jdbcTemplate.queryForObject(query, new AccountNumber(), id).equals(accNo);
+	}
+	
+	public boolean checkPassword(int userId, String password){
+		String query = "SELECT password FROM users WHERE user_id = ?";
+		String dbPassword =  jdbcTemplate.queryForObject(query, new CheckPassword(), userId);
+		return password.equals(dbPassword);
+	}
+
+	public boolean checkPassword(String walletId, String password){
+		String query = "SELECT password FROM users WHERE email = ?";
+		String dbPassword =  jdbcTemplate.queryForObject(query, new CheckPassword(), walletId);
+		 return password.equals(dbPassword);
+	}
+	
+	public void depositAmount(String accNo, double amount) throws ClassNotFoundException, SQLException {
+		String query = "UPDATE bank_accounts SET balance = ? WHERE account_number = ?";
+		Object[] params = {amount, accNo};
+		jdbcTemplate.update(query, params);
 	}
 
 }

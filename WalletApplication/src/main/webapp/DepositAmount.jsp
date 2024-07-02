@@ -63,7 +63,6 @@
     <div class="container">
         <h2>Transaction Form</h2>
         <form action="CreateAccount" method="post">
-        	<input type="hidden" name="action" value="depositAmount" >
             <label for="accountNumber">Account Number:</label>
             <input type="text" id="accountNumber" name="accountNumber" required><br><br>
             
