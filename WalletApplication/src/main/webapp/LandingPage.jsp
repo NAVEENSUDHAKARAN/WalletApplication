@@ -581,12 +581,12 @@ opacity: 100%;
 								width="21px" height="21px">&nbsp;Send Money
 						</h5>
 						<p class="card-text">to any Digipay User or Bank Account.</p>
-
-							<button
-							 onclick="openTransferDialog()" 
+	
+							<button 
+							 onclick="window.location.href='WalletTransfer.jsp'" 
 							style="background-color: #3c445c; border-color: black;"
 							class="btn btn-primary">Transfer</button>
-							
+						
 							<button
 							 onclick="window.location.href='LinkAccount.jsp'" 
 							style="background-color: #3c445c; border-color: black;"
@@ -732,9 +732,7 @@ function openTransferDialog() {
                 cancelButtonText: 'Cancel',
                 showLoaderOnConfirm: true,
                 preConfirm: () => {
-                    const amount = document.getElementById('amountInput').value;
-                    console.log('Account Number:', amount);
-                    return amount;
+                    
                 }
             }).then((result) => {
                 if (result.isConfirmed) {

@@ -1,6 +1,5 @@
 package com.chainsys.walletapplication.dao;
 
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -25,6 +24,8 @@ import com.chainsys.walletapplication.mapper.CheckWalletId;
 import com.chainsys.walletapplication.mapper.GetUserId;
 import com.chainsys.walletapplication.mapper.GetUserName;
 import com.chainsys.walletapplication.mapper.GetWalletBalance;
+import com.chainsys.walletapplication.mapper.GetWalletId;
+import com.chainsys.walletapplication.mapper.TransactionDetails;
 import com.chainsys.walletapplication.mapper.UserDetails;
 import com.chainsys.walletapplication.model.BankAccounts;
 import com.chainsys.walletapplication.model.Cards;
@@ -183,19 +184,18 @@ public class WalletImpl implements WalletDAO {
 		return walletDetailsList;
 	}
 	
-	public List<Wallets> readWalletDetails(String walletId) throws ClassNotFoundException {
+	public List<Wallets> readWalletDetails(String walletId) {
 		List<Wallets> walletDetailsList = new ArrayList<>();
 		String query = "SELECT wallet_id, user_id, balance, qr FROM wallets WHERE wallet_id = ?";
 		jdbcTemplate.query(query, new UserDetails(), walletId);
 		return walletDetailsList;
 	}
 	
-	public List<Transactions> readTransactionHistory(String walletId) throws ClassNotFoundException {
-		List<Transactions> historyDetailsList = new ArrayList<>();
+	public List<Transactions> readTransactionHistory(String walletId) {
 		String query = "SELECT transaction_id, sender_wallet_id, receiver_wallet_id, DataAndTime, amount "
 				+ "FROM transactions WHERE sender_wallet_id = ? ORDER BY DataAndTime DESC";
-		jdbcTemplate.query(query, new UserDetails(), walletId);
-		return historyDetailsList;
+		return jdbcTemplate.query(query, new TransactionDetails(), walletId);
+		
 	}
 	
 	public List<Cards> readCardDetails(int userId) {
@@ -241,7 +241,12 @@ public class WalletImpl implements WalletDAO {
 	
 	public boolean checkWalletId(String walletId){
 		String query = "SELECT wallet_id FROM wallets WHERE wallet_id = ?";
-		return jdbcTemplate.queryForObject(query, new CheckWalletId(), walletId) != null;
+		try {
+			return jdbcTemplate.queryForObject(query, new CheckWalletId(), walletId) != null;
+		}catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	@Override
@@ -251,14 +256,42 @@ public class WalletImpl implements WalletDAO {
 		jdbcTemplate.update(query, updatedAmount, id);	
 	}
 	
-	public double getWalletBalance(String walletId) throws ClassNotFoundException, SQLException {
+	public double getWalletBalance(String walletId) {
 		String query = "SELECT balance FROM wallets WHERE wallet_id = ?";
 		return jdbcTemplate.queryForObject(query, new GetWalletBalance(), walletId);
 	}
 	
-	public void updateWalletBalance(double balance, String walletId) throws ClassNotFoundException, SQLException {
+	public void updateWalletBalance(double balance, String walletId) {
 		String query = "update wallets set balance = ? where wallet_id = ?";
-		Object[] params = {balance, walletId};
+		double amountToUpdate = balance + getWalletBalance(walletId);
+		Object[] params = {amountToUpdate, walletId};
+		jdbcTemplate.update(query, params);
+	}
+	
+	public void createWalletId(Wallets walletInfo) {
+		String query = "INSERT INTO wallets (wallet_id, user_id, balance, qr) VALUES (?, ?, ?, ?)";
+		System.out.println("Chumma dha irukku");
+	}
+
+	public boolean checkWalletId(int id) {
+		String query = "SELECT wallet_id FROM wallets WHERE user_id = ?";
+		return jdbcTemplate.queryForObject(query, new CheckWalletId(), id) != null;
+	}
+
+	public String getWalletId(int id) {
+		String query = "SELECT wallet_id FROM wallets WHERE user_id = ?";
+		return jdbcTemplate.queryForObject(query, new GetWalletId(), id);
+	}
+	
+	public void deductWalletBalance(String walletId, double amount) {
+		String query = "update wallets set balance = ? where wallet_id = ?";
+		double updatedAmount = getWalletBalance(walletId) - amount;
+		jdbcTemplate.update(query,updatedAmount, walletId);
+	}
+	
+	public void updateTransactionHistory(String senderId, String receiverId, double amount) {
+		String query = "INSERT INTO transactions (transaction_id, sender_wallet_id, receiver_wallet_id, DataAndTime, amount) VALUES (?,?,?,?,?)";
+		Object[] params = {transactionIdGenerator(), senderId, receiverId, LocalDateTime.now(), amount};
 		jdbcTemplate.update(query, params);
 	}
 }

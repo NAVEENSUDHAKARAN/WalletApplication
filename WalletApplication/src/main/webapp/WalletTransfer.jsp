@@ -1,8 +1,10 @@
+<%@page import="org.springframework.web.context.support.WebApplicationContextUtils"%>
+<%@page import="org.springframework.context.ApplicationContext"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
-<%@ page import="com.chainsys.model.WalletIdInfo" %>
-<%@ page import="com.chainsys.model.TransactionInfo" %>
-<%@ page import="com.chainsys.dao.ServerManager" %>
+<%@ page import="com.chainsys.walletapplication.model.Wallets" %>
+<%@ page import="com.chainsys.walletapplication.model.Transactions" %>
+<%@ page import="com.chainsys.walletapplication.dao.WalletImpl" %>
 <%@ page import="java.util.List" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -85,9 +87,10 @@
  </style>
 <body>
 <%
-int id = Integer.parseInt(request.getParameter("id"));
+int id = (int) session.getAttribute("userid");
     System.out.println("parsed Value : " + id);
-    WalletImpl manager = new WalletImpl();
+    ApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+    WalletImpl walletImpl = (WalletImpl) context.getBean("walletImpl");
 %>
   <section style="background-color: #eee;">
   <div class="container py-5">
@@ -97,10 +100,10 @@ int id = Integer.parseInt(request.getParameter("id"));
           <div class="card-body text-center">
             <img src="images/DigiPayLogo.png" alt="avatar"
               class="rounded-circle img-fluid" style="width: 150px;">
-            <h5 class="my-3"><%= manager.getUserName(id) %></h5>
-            <p class="text-muted mb-1"><%= manager.getWalletId(id) %></p>
+            <h5 class="my-3"><%= walletImpl.getUserName(id) %></h5>
+            <p class="text-muted mb-1"><%= walletImpl.getWalletId(id) %></p>
             <h3>Wallet Balance</h3>
-            <p><%= manager.getWalletBalance(id) %></p>
+            <p><%= walletImpl.getWalletBalance(id) %></p>
           </div>
         </div>
         <div class="card mb-4 mb-lg-0">
@@ -113,8 +116,8 @@ int id = Integer.parseInt(request.getParameter("id"));
         </div>
       </div>
       <div class="col-lg-8">
-        <form action="Transfers" method="post">
-       		<input type="hidden" name="action" value="walletTransfer">
+        <form action="WalletTransfer" method="post">
+       		<input type="hidden" name="userId" value="<%= id %>" >       		
             <input type="hidden" name="id" value="<%= id %>">
         	<div class="card mb-4">
           <div class="card-body">
@@ -123,7 +126,7 @@ int id = Integer.parseInt(request.getParameter("id"));
                 <p class="mb-0">Sender WalletID</p>
               </div>
               <div class="col-sm-9">
-                <input type="text" style="border: hidden;" name="senderWalletId" class="text-muted mb-0" value="<%= manager.getWalletId(id) %>"  readonly>
+                <input type="text" style="border: hidden;" name="senderWalletId" class="text-muted mb-0" value="<%= walletImpl.getWalletId(id) %>"  readonly>
               </div>
             </div>
             <hr>
@@ -132,7 +135,7 @@ int id = Integer.parseInt(request.getParameter("id"));
                 <p class="mb-0">Receiver WalletID</p>
               </div>
               <div class="col-sm-9">
-                <input style="width: 50%; border: hidden;" class="text-muted mb-0" type="text" name="receiverWalletID" required >&nbsp;&nbsp;&nbsp;<button type="button" onclick="generateQRCode()" id="btn" >Generate QR</button>
+                <input style="width: 50%; border: hidden;" class="text-muted mb-0" type="text" name="receiverWalletId" required >&nbsp;&nbsp;&nbsp;<button type="button" onclick="generateQRCode()" id="btn" >Generate QR</button>
               </div>
               <div id="qrBar" class="bar">
 	            <div id="qrCodeDiv"></div>
@@ -183,9 +186,9 @@ int id = Integer.parseInt(request.getParameter("id"));
               </tr>
             </thead>
        <%
-       		String senderWalletId = manager.getWalletId(id);
-       		List<TransactionInfo> transactionDetails = manager.readTransactionHistory(senderWalletId);
-       		for(TransactionInfo details : transactionDetails){
+       		String senderWalletId = walletImpl.getWalletId(id);
+       		List<Transactions> transactionDetails = walletImpl.readTransactionHistory(senderWalletId);
+       		for(Transactions details : transactionDetails){
        %>
             <tbody>
               <tr>
@@ -208,44 +211,44 @@ int id = Integer.parseInt(request.getParameter("id"));
   
 <script>
 
-<% 
-String alertMessage = (String) request.getAttribute("alertMessage");
-System.out.println("alertMsg : " + alertMessage);
-if(alertMessage != null && !alertMessage.isEmpty()){
-    if(alertMessage.equals("Invalid Password")){
-%>
-Swal.fire({
-title: '<%= alertMessage %>',
-type: 'error',
-confirmButtonColor: '#3c445c',
-confirmButtonText: 'Ok'
-})
-<% }else if(alertMessage.equals("Invalid WalletID")){ %>
-Swal.fire({
-  title: '<%= alertMessage %>',
-  type: 'error',
-  confirmButtonColor: '#3c445c',
-  confirmButtonText: 'Ok'
-})
-<%}
-}%>
-
-function generateQRCode() {
-    var receiverWalletId = document.getElementById("receiverWalletId").value;
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            document.getElementById("qrCodeDiv").innerHTML = this.responseText;
-            document.getElementById("qrBar").style.width = "50%";
-        }
-    };
-    xhr.open("GET", "QRPage.jsp?recId=" + receiverWalletId, true);
-    xhr.send();
-}
-
-function closeQr() {
-    document.getElementById("qrBar").style.width = "0";
-}
+		<% 
+		String alertMessage = (String) request.getAttribute("alertMessage");
+		System.out.println("alertMsg : " + alertMessage);
+		if(alertMessage != null && !alertMessage.isEmpty()){
+		    if(alertMessage.equals("Invalid Password")){
+		%>
+		Swal.fire({
+		title: '<%= alertMessage %>',
+		type: 'error',
+		confirmButtonColor: '#3c445c',
+		confirmButtonText: 'Ok'
+		})
+		<% }else if(alertMessage.equals("Invalid WalletID")){ %>
+		Swal.fire({
+		  title: '<%= alertMessage %>',
+		  type: 'error',
+		  confirmButtonColor: '#3c445c',
+		  confirmButtonText: 'Ok'
+		})
+		<%}
+		}%>
+		
+		function generateQRCode() {
+		    var receiverWalletId = document.getElementById("receiverWalletId").value;
+		    var xhr = new XMLHttpRequest();
+		    xhr.onreadystatechange = function() {
+		        if (this.readyState == 4 && this.status == 200) {
+		            document.getElementById("qrCodeDiv").innerHTML = this.responseText;
+		            document.getElementById("qrBar").style.width = "50%";
+		        }
+		    };
+		    xhr.open("GET", "QRPage.jsp?recId=" + receiverWalletId, true);
+		    xhr.send();
+		}
+		
+		function closeQr() {
+		    document.getElementById("qrBar").style.width = "0";
+		}
 
 </script>
 </section>

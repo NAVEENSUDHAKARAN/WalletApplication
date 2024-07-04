@@ -112,7 +112,7 @@ public class UserController {
 	
 	@PostMapping("AccountTransfer")
 	public String accountTransfer(@RequestParam("recipientAccountNumber") String senderAccNo, @RequestParam("amountToSend") double amountToSend,
-			@RequestParam("receiverWalletID") String receiverWalletId) throws ClassNotFoundException, SQLException {
+			@RequestParam("receiverWalletID") String receiverWalletId, Model model){
 		int userId = walletImpl.getUserID(users);
 		
 		if(walletImpl.checkWalletId(receiverWalletId) && walletImpl.checkAccountNumber(userId, senderAccNo)) {
@@ -121,13 +121,36 @@ public class UserController {
 			walletImpl.updateWalletBalance(amountToSend, receiverWalletId);
 			return "LandingPage.jsp";
 		}
-		return "";
+		else if(senderAccNo == null) {
+			model.addAttribute("invalidWalletIdMsg", "Create Account");
+			return "AccountTransferPage.jsp";
+		}
+		else
+		{
+			 model.addAttribute("invalidWalletIdMsg", "Can't Find The WalletID");
+			 return "AccountTransferPage.jsp";
+		}
 	}
 	
 	@PostMapping("WalletTransfer")
-	public String walletTransfer() {
+	public String walletTransfer(@RequestParam("userId") int userId, @RequestParam("amountToSend") double amountToSend, @RequestParam("senderWalletId") String senderId,
+				@RequestParam("receiverWalletId") String receiverId, @RequestParam("password") String password, Model model) {
 		
-		return "LandingPage.jsp";
+		if(walletImpl.checkWalletId(receiverId) && walletImpl.checkWalletId(senderId) && walletImpl.checkPassword(userId, password)) {
+			walletImpl.deductWalletBalance(senderId, amountToSend);
+			walletImpl.updateWalletBalance(amountToSend, receiverId);
+			walletImpl.updateTransactionHistory(senderId, receiverId, amountToSend);
+			return "LandingPage.jsp";
+		}
+		else if(!walletImpl.checkPassword(userId, password)){
+			model.addAttribute("alertMessage", "Invalid Password");
+			return "WalletTransfer.jsp";
+		}
+		else if(!walletImpl.checkWalletId(receiverId)) {
+			model.addAttribute("alertMessage", "Invalid WalletID");
+			return "WalletTransfer.jsp";		
+		}
+		return "";
 	}
 	
 	@PostMapping("/Logout")
