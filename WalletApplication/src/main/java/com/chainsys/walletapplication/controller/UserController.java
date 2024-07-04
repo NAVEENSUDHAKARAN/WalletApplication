@@ -1,6 +1,5 @@
 package com.chainsys.walletapplication.controller;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +18,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
-
 public class UserController {
 
 	@Autowired
-	WalletImpl manager;
+	WalletImpl walletImpl;
 
 	@Autowired
 	Users users;
@@ -50,9 +48,9 @@ public class UserController {
 		account.setAadharNumber(aadhaarNumber);
 		account.setAddress(residentialAddress);
 
-		if (!manager.retrieveUserCred(users)) {
-			manager.setUserDetails(users);
-			manager.createAccount(account, manager.getUserID(users));
+		if (!walletImpl.retrieveUserCred(users)) {
+			walletImpl.setUserDetails(users);
+			walletImpl.createAccount(account, walletImpl.getUserID(users));
 			return "LoginPage.jsp";
 		} else {
 			model.addAttribute("message", "Account Already Exist");
@@ -66,13 +64,13 @@ public class UserController {
 		users.setEmail(mail);
 		users.setPassword(password);
 
-		if (manager.checkLogin(mail, password)) {
-			session.setAttribute("userName", manager.getUserName(users));
-			session.setAttribute("userid", manager.getUserID(users));
-			int userId = manager.getUserID(users);
-			session.setAttribute("accountDetails", manager.readAccountDetails(userId));
-			session.setAttribute("userIdFromCards", manager.getUserIdFromCards(userId));
-			session.setAttribute("cardDetails", manager.readCardDetails(userId));
+		if (walletImpl.checkLogin(mail, password)) {
+			session.setAttribute("userName", walletImpl.getUserName(users));
+			session.setAttribute("userid", walletImpl.getUserID(users));
+			int userId = walletImpl.getUserID(users);
+			session.setAttribute("accountDetails", walletImpl.readAccountDetails(userId));
+			session.setAttribute("userIdFromCards", walletImpl.getUserIdFromCards(userId));
+			session.setAttribute("cardDetails", walletImpl.readCardDetails(userId));
 			return "redirect:/LandingPage.jsp";
 		} else {
 			model.addAttribute("error", "Invalid Email or Password");
@@ -81,11 +79,55 @@ public class UserController {
 
 	}
 	
-	@PostMapping("CreateAccount")
+	@PostMapping("/CreateAccount")
 	public String createAccount(@RequestParam("accountNumber") String accountNumber, @RequestParam("amount") double amount, 
-			@RequestParam("password") String password) {
-		
+			@RequestParam("password") String password, Model model) {
+		int userId = walletImpl.getUserID(users);
+
+		if(walletImpl.checkAccountNumber(userId, accountNumber) && walletImpl.checkPassword(userId, password)) {
+			amount += walletImpl.getAvailableBalance(accountNumber);
+			walletImpl.depositAmount(accountNumber, amount);
+			double balance = walletImpl.getAvailableBalance(accountNumber);
+			model.addAttribute("balance", balance);
+			return "LandingPage.jsp";
+		}
+		else if(!walletImpl.checkPassword(userId, password))
+		{
+			
+			model.addAttribute("message", "Invalid Password");
+			return "DepositAmount.jsp";		
+		}
+		else if(!walletImpl.checkAccountNumber(userId,accountNumber))
+		{
+			model.addAttribute("message", "Invalid AccountNumber");
+			return "DepositAmount.jsp";		
+		}
+		else if(!walletImpl.checkPassword(userId, password) && !walletImpl.checkAccountNumber(userId,accountNumber))
+		{
+			model.addAttribute("message", "Invalid AccountNumber and Password");
+			return "DepositAmount.jsp";		
+		}
 		return "";
+	}
+	
+	@PostMapping("AccountTransfer")
+	public String accountTransfer(@RequestParam("recipientAccountNumber") String senderAccNo, @RequestParam("amountToSend") double amountToSend,
+			@RequestParam("receiverWalletID") String receiverWalletId) throws ClassNotFoundException, SQLException {
+		int userId = walletImpl.getUserID(users);
+		
+		if(walletImpl.checkWalletId(receiverWalletId) && walletImpl.checkAccountNumber(userId, senderAccNo)) {
+			walletImpl.deductBankBalance(userId, amountToSend);
+			amountToSend += walletImpl.getWalletBalance(receiverWalletId);
+			walletImpl.updateWalletBalance(amountToSend, receiverWalletId);
+			return "LandingPage.jsp";
+		}
+		return "";
+	}
+	
+	@PostMapping("WalletTransfer")
+	public String walletTransfer() {
+		
+		return "LandingPage.jsp";
 	}
 	
 	@PostMapping("/Logout")

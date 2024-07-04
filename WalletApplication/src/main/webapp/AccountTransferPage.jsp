@@ -1,7 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="com.chainsys.dao.ServerManager" %>
-<%@ page import="com.chainsys.model.UserInfo" %>
-<%@ page import="com.chainsys.model.BankAccountInfo" %>
+<%@page import="org.springframework.web.context.support.WebApplicationContextUtils"%>
+<%@page import="org.springframework.context.ApplicationContext"%>
+<%@ page import="com.chainsys.walletapplication.dao.WalletImpl" %>
+<%@ page import="com.chainsys.walletapplication.model.Users" %>
+<%@ page import="com.chainsys.walletapplication.model.BankAccounts" %>
 <%@ page import="java.util.List" %>
 <!DOCTYPE html>
 <html lang="en">
@@ -75,27 +77,27 @@
         <h1>Send Money</h1>
 
         <%
-        HttpSession transfers = request.getSession();
-                   int id = (int) transfers.getAttribute("userid");
-                   WalletImpl manager = new WalletImpl();
-                   List<UserInfo> userDetails = manager.readUserDetails(id);
-                   for(UserInfo user : userDetails) {
+        	HttpSession transfers = request.getSession();
+            int id = (int) transfers.getAttribute("userid");
+			ApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+	     	WalletImpl walletImpl = (WalletImpl) context.getBean("walletImpl");
+            List<Users> userDetails = walletImpl.readUserDetails(id);
+            for(Users user : userDetails) {
         %>
-        <form action="Transfers" method="post">
-        <input type="hidden" name="action" value="accountTransfer" > 
+        <form action="AccountTransfer" method="post"> 
             <label for="recipientName">Recipient Name:</label>
             <div class="accountNumber-container">
                 <input type="text" id="recipientName" name="recipientName" value="<%= user.getFirstName() %>" required readonly="readonly">
             </div>
         <% } %>
         
-        <% List<BankAccountInfo> accountDetails = manager.readAccountDetails(id);
-           for(BankAccountInfo accountInfo : accountDetails) {
+        <% List<BankAccounts> accountDetails = walletImpl.readAccountDetails(id);
+           for(BankAccounts accountInfo : accountDetails) {
         %>
 
             <label for="recipientWalletID">Recipient AccountNumber:</label>
             <div class="accountNumber-container">
-                <input type="text" id="recipientWalletID" name="recipientWalletID" value="<%= accountInfo.getAccNo() %>" required readonly="readonly">
+                <input type="text" id="recipientWalletID" name="recipientAccountNumber" value="<%= accountInfo.getAccNo() %>" required readonly="readonly">
             </div>
         <% } %>
         

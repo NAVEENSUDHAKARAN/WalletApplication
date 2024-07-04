@@ -77,25 +77,28 @@ textarea {
 										<h3 class="fw-normal mb-5" style="color: #3c455c;">General
 											Information</h3>
 
-<form action="Register" method="post">
-			
+										<form action="Register" method="post">
+
 											<div class="row">
 												<div class="col-md-6 mb-4 pb-2">
 													<div data-mdb-input-init class="form-outline">
 														<label class="form-label" for="form3Examplev2">First
 															name</label> <input type="text" name="firstName"
-															id="form3Examplev2" class="form-control form-control-lg"
-															required />
-
+															id="form3Examplev2" pattern="^[A-Za-z]+$"
+															title="Name Should Have only Characters"
+															class="form-control form-control-lg" required /> <span
+															class="error-message" style="font-size: 10px"></span>
 													</div>
+
 												</div>
 												<div class="col-md-6 mb-4 pb-2">
 													<div data-mdb-input-init class="form-outline">
 														<label class="form-label" for="form3Examplev3">Last
 															name</label> <input type="text" id="form3Examplev3"
-															name="lastName" class="form-control form-control-lg"
-															required />
-
+															name="lastName" pattern="^[A-Za-z]+$"
+															title="Name Should Have only Characters"
+															class="form-control form-control-lg" required /> <span
+															class="error-message" style="font-size: 10px"></span>
 													</div>
 												</div>
 											</div>
@@ -112,20 +115,22 @@ textarea {
 													<div data-mdb-input-init class="form-outline">
 														<label class="form-label" for="form3Examplev5">Phone
 															Number</label> <input type="text" id="form3Examplev5"
-															name="phoneNumber" class="form-control form-control-lg"
-															required />
-
+															name="phoneNumber" pattern="^[6-8]\d{9}$"
+															title="Should have 10 Numbers"
+															class="form-control form-control-lg" required /> <span
+															class="error-message" style="font-size: 10px"></span>
 													</div>
 												</div>
 											</div>
-											<br>
-											<br>
+											<br> <br>
 											<div class="mb-4 pb-2">
 												<div data-mdb-input-init class="form-outline">
 													<label class="form-label" for="form3Examplev4">Password</label>
 													<input type="password" id="form3Examplev4" name="password"
-														class="form-control form-control-lg" required />
-
+														pattern="^(?=.*[A-Z])(?=.*[0-9]).{8,}$"
+														title="Password must be at least 8 characters long and includes atleast one uppercase letter and one digit"
+														class="form-control form-control-lg" required /> <span
+														class="error-message" style="font-size: 15px"></span>
 												</div>
 											</div>
 											<%
@@ -187,7 +192,7 @@ textarea {
 											<input class="form-check-input me-3" type="checkbox" value=""
 												id="form2Example3c" /> <label
 												class="form-check-label text-white" for="form2Example3">
-												I do accept the <a href="#!" class="text-white"><u>Terms and Conditions</u></a> of your site.
+												I do accept the <a href="#!" class="text-white">Terms and Conditions</a> of your site.
 											</label>
 										</div>
 										<button type="submit" data-mdb-button-init
@@ -205,5 +210,67 @@ textarea {
 		</div>
 	</section>
 </body>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
 
+    form.addEventListener("input", function(event) {
+        const input = event.target;
+        const isValid = validateInput(input);
+
+        if (!isValid) {
+            displayError(input);
+        } else {
+            clearError(input);
+        }
+    });
+
+    function validateInput(input) {
+        const value = input.value.trim();
+        const id = input.id;
+
+        switch (id) {
+            case 'form3Examplev2':
+            case 'form3Examplev3':
+                return /^[A-Za-z]+$/.test(value);
+            case 'form3Examplev5':
+                return /^[6-9]\d{9}$/.test(value); 
+            case 'form3Examplev4':
+            	return /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$/.test(value);
+            // Add more cases for other input fields as needed
+            default:
+                return true; 
+        }
+    }
+
+    function displayError(input) {
+        const errorElement = input.nextElementSibling;
+        const id = input.id;
+
+        switch (id) {
+            case 'form3Examplev2':
+            case 'form3Examplev3':
+                errorElement.innerText = 'Name should have only characters.';
+                break;
+            case 'form3Examplev5':
+                errorElement.innerText = 'Should have 10 Numbers starting from 6 to 8.';
+                break;
+            case 'form3Examplev4':
+            	errorElement.innerText = 'Password must be at least 8 characters long and includes atleast one uppercase letter and one digit';
+            	break;
+            	// Add more cases for other input fields as needed
+            default:
+                errorElement.innerText = '';
+                break;
+        }
+
+        errorElement.style.color = 'red';
+    }
+
+    function clearError(input) {
+        const errorElement = input.nextElementSibling;
+        errorElement.innerText = '';
+    }
+});
+</script>
 </html>

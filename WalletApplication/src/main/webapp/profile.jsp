@@ -520,7 +520,7 @@ body {
            <%} %> 
 
 			<%
-				if((boolean) id.getAttribute("userIdFromCards")){
+			if((boolean) id.getAttribute("userIdFromCards")){
 			%>	
 			<div id="debitCard" class="card-mockup flex-vertical snipcss0-0-0-1 snipcss-c6oPp">
 		    <img id="logo" src="images/DigiPayNoBG.png" alt="logo" height="40px" width="40px" ><br>

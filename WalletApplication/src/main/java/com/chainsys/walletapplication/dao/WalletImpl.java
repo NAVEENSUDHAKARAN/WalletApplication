@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -17,10 +16,12 @@ import org.springframework.stereotype.Repository;
 
 import com.chainsys.walletapplication.mapper.AccountDetail;
 import com.chainsys.walletapplication.mapper.AccountNumber;
+import com.chainsys.walletapplication.mapper.BankBalance;
 import com.chainsys.walletapplication.mapper.CardDetails;
 import com.chainsys.walletapplication.mapper.CardUserID;
 import com.chainsys.walletapplication.mapper.CheckLogin;
 import com.chainsys.walletapplication.mapper.CheckPassword;
+import com.chainsys.walletapplication.mapper.CheckWalletId;
 import com.chainsys.walletapplication.mapper.GetUserId;
 import com.chainsys.walletapplication.mapper.GetUserName;
 import com.chainsys.walletapplication.mapper.GetWalletBalance;
@@ -30,8 +31,6 @@ import com.chainsys.walletapplication.model.Cards;
 import com.chainsys.walletapplication.model.Transactions;
 import com.chainsys.walletapplication.model.Users;
 import com.chainsys.walletapplication.model.Wallets;
-
-import jakarta.servlet.http.HttpSession;
 
 @Repository
 public class WalletImpl implements WalletDAO {
@@ -125,7 +124,12 @@ public class WalletImpl implements WalletDAO {
 	public boolean getUserIdFromCards(int userId) {
 		String query = "select user_id from cards where user_id = ?";
 		System.err.println("in getUserIdFromCards" + userId);
-		return jdbcTemplate.queryForObject(query, new CardUserID(), userId) != 0;
+		try {
+			return jdbcTemplate.queryForObject(query, new CardUserID(), userId) != 0;
+		}catch(Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	public boolean checkUserId(int id) {
@@ -199,27 +203,62 @@ public class WalletImpl implements WalletDAO {
 		return jdbcTemplate.query(query, new CardDetails(), userId);
 	}
 	
-	public boolean checkAccountNumber(int id, String accNo){
+	public boolean checkAccountNumber(int id, String accNo) {
 		String query = "SELECT account_number FROM bank_accounts WHERE user_id = ?";
-		return jdbcTemplate.queryForObject(query, new AccountNumber(), id).equals(accNo);
+		String dbAcc = jdbcTemplate.queryForObject(query, new AccountNumber(), id).toString();
+		System.out.println("dbAcc --> " + dbAcc);
+		System.out.println("Acc --> " + accNo);
+		return accNo.equals(dbAcc);
 	}
 	
-	public boolean checkPassword(int userId, String password){
+	public boolean checkPassword(int userId, String password) {
 		String query = "SELECT password FROM users WHERE user_id = ?";
 		String dbPassword =  jdbcTemplate.queryForObject(query, new CheckPassword(), userId);
 		return password.equals(dbPassword);
 	}
 
-	public boolean checkPassword(String walletId, String password){
+	public boolean checkPassword(String walletId, String password) {
 		String query = "SELECT password FROM users WHERE email = ?";
 		String dbPassword =  jdbcTemplate.queryForObject(query, new CheckPassword(), walletId);
 		 return password.equals(dbPassword);
 	}
 	
-	public void depositAmount(String accNo, double amount) throws ClassNotFoundException, SQLException {
+	public void depositAmount(String accNo, double amount) {
 		String query = "UPDATE bank_accounts SET balance = ? WHERE account_number = ?";
 		Object[] params = {amount, accNo};
 		jdbcTemplate.update(query, params);
 	}
+	
+	public double getAvailableBalance(String accNo) {
+		String query = "SELECT balance FROM bank_accounts WHERE account_number = ?";
+		return jdbcTemplate.queryForObject(query, new BankBalance(), accNo);
+	}
+	
+	public double getBalance(int id) {
+		String query = "SELECT balance FROM bank_accounts WHERE user_id = ?";
+		return jdbcTemplate.queryForObject(query, new BankBalance(), id);
+	}
+	
+	public boolean checkWalletId(String walletId){
+		String query = "SELECT wallet_id FROM wallets WHERE wallet_id = ?";
+		return jdbcTemplate.queryForObject(query, new CheckWalletId(), walletId) != null;
+	}
 
+	@Override
+	public void deductBankBalance(int id, double amount) {
+		String query = "UPDATE bank_accounts SET balance = ? WHERE user_id = ?";
+		double updatedAmount = getBalance(id) - amount;
+		jdbcTemplate.update(query, updatedAmount, id);	
+	}
+	
+	public double getWalletBalance(String walletId) throws ClassNotFoundException, SQLException {
+		String query = "SELECT balance FROM wallets WHERE wallet_id = ?";
+		return jdbcTemplate.queryForObject(query, new GetWalletBalance(), walletId);
+	}
+	
+	public void updateWalletBalance(double balance, String walletId) throws ClassNotFoundException, SQLException {
+		String query = "update wallets set balance = ? where wallet_id = ?";
+		Object[] params = {balance, walletId};
+		jdbcTemplate.update(query, params);
+	}
 }

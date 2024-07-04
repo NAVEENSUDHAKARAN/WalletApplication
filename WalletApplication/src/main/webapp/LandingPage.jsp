@@ -289,16 +289,12 @@ to {
 }
 
 #addressDiv {
+	position:relative;
 	background-color: whitesmoke;
 	width: 25%;
 	height: 100%;
 }
 
-#address{
-	position: absolute;
-	/* background-color: aqua; */
-	right: 90%;
-}
 
 #copyRightsText {
 	position: relative;
@@ -453,7 +449,6 @@ opacity: 100%;
 	<%
 	if (session == null) {
 			response.sendRedirect("LoginPage.jsp");
-			
 	}
 	
 		WalletImpl manager = new WalletImpl();
@@ -610,7 +605,7 @@ opacity: 100%;
             <img src="https://akam.cdn.jdmagicbox.com/images/icontent/newwap/web2022/bharat_billpay.svg" alt="Bills &amp; Recharge Icon">
         </div>
         <p>Pay your bills &amp; recharge instantly with Justdial</p>
-        <a href="https://www.justdial.com/online-bill-payment">Explore More</a>
+        <a href="">Explore More</a>
     </div>
 
     <div id="billTypes" class="bill-types">
@@ -703,9 +698,9 @@ opacity: 100%;
 <script>
 function openTransferDialog() {
 
-	 var valueToSend = "transfer";
+	 var valueToSend = "WalletTransfer";
 	$.ajax({
-        url: "CreateAccount",
+        url: "UserController",
         method: "post",
         data:{
         	action: valueToSend

@@ -25,18 +25,34 @@
             color: #333;
         }
         label {
+        	position:relative;
+            left: 50px;
             display: block;
             margin-bottom: 10px;
         }
         .form-control {
-            width: 100%;
+            width: 80%;
             padding: 5px;
+            position:relative;
+            left: 50px;
             font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 5px;
             box-sizing: border-box;
         }
+        
+        input[type = radio],
+        span
+        {
+        	 position:relative;
+            left: 80px;
+        }
+        
+        
+        
         .btn {
+        	position:relative;
+            left: -80px;
             background-color: #3c455c;
             color: white;
             padding: 12px 20px;

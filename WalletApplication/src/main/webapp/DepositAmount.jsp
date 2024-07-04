@@ -78,9 +78,9 @@
     </div>
     <script>  
     <% 
-		String invalidateMessage = (String) request.getAttribute("invalidateMessage");
+		String invalidateMessage = (String) request.getAttribute("message");
 		String balance = (String) request.getAttribute("balance");
-		
+		System.out.println("balancee ---? "+ balance);
 		if(invalidateMessage != null && !invalidateMessage.isEmpty()) { 
 		%>
 		
