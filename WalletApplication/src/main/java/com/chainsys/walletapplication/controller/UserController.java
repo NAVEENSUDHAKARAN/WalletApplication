@@ -1,17 +1,23 @@
 package com.chainsys.walletapplication.controller;
 
-import java.sql.SQLException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.time.YearMonth;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.chainsys.walletapplication.dao.WalletImpl;
 import com.chainsys.walletapplication.model.BankAccounts;
+import com.chainsys.walletapplication.model.Cards;
 import com.chainsys.walletapplication.model.Users;
+import com.chainsys.walletapplication.model.Wallets;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,6 +31,12 @@ public class UserController {
 
 	@Autowired
 	Users users;
+	
+	@Autowired
+	Cards cards;
+	
+	@Autowired
+	Wallets wallets;
 	
 	@RequestMapping("/")
 	public String home() {
@@ -110,7 +122,7 @@ public class UserController {
 		return "";
 	}
 	
-	@PostMapping("AccountTransfer")
+	@PostMapping("/AccountTransfer")
 	public String accountTransfer(@RequestParam("recipientAccountNumber") String senderAccNo, @RequestParam("amountToSend") double amountToSend,
 			@RequestParam("receiverWalletID") String receiverWalletId, Model model){
 		int userId = walletImpl.getUserID(users);
@@ -132,9 +144,32 @@ public class UserController {
 		}
 	}
 	
-	@PostMapping("WalletTransfer")
+	@PostMapping("/WalletTransfer")
 	public String walletTransfer(@RequestParam("userId") int userId, @RequestParam("amountToSend") double amountToSend, @RequestParam("senderWalletId") String senderId,
-				@RequestParam("receiverWalletId") String receiverId, @RequestParam("password") String password, Model model) {
+				@RequestParam("receiverWalletId") String receiverId, @RequestParam("password") String password, Model model) throws UnknownHostException {
+		System.err.println("-----");
+		
+		if(!walletImpl.checkWalletId(userId))
+		{
+			String email = walletImpl.getEmail(userId);
+			String[] splitedEmail = email.split("@");
+			String walletId = splitedEmail[0] + "@digipay";
+			
+			model.addAttribute("walletID", walletId);
+			if(!walletImpl.checkWalletId(userId))
+			{
+				InetAddress localhost = InetAddress.getLocalHost();
+		        //DynamicQR.generateQr(walletId.getUserName(userId),localhost.getHostAddress()+":8080/WalletApplication/MobileTransaction.jsp?id=" + id+"&walletId="+ walletId,walletInfo);
+		       				        
+				wallets.setId(userId);
+				wallets.setWalletId(walletId);
+				
+				walletImpl.createWalletId(wallets);
+				return "WalletTransfer.jsp";
+			}
+			
+		}
+		
 		
 		if(walletImpl.checkWalletId(receiverId) && walletImpl.checkWalletId(senderId) && walletImpl.checkPassword(userId, password)) {
 			walletImpl.deductWalletBalance(senderId, amountToSend);
@@ -151,6 +186,45 @@ public class UserController {
 			return "WalletTransfer.jsp";		
 		}
 		return "";
+	}
+	
+	@PostMapping("/CreateCard")
+	public String createCard() {
+		int userId = walletImpl.getUserID(users);
+		
+		walletImpl.deductionForCardApply(userId);
+		cards.setId(userId);
+		cards.setCardNumber(walletImpl.digipayCardNumberGenerator());
+		YearMonth appliedDate = YearMonth.now();
+		cards.setAppliedDate(appliedDate.toString());
+		YearMonth expiryDate = appliedDate.plusYears(3);
+		cards.setExpiryDate(expiryDate.toString());
+		cards.setCvv(walletImpl.cvvGenerator());
+		walletImpl.setCardDetails(cards);
+		
+		return "profile.jsp";
+	}
+	
+	@PostMapping("/CardPayment")
+	public String cardPayment(@RequestParam("cardNumber") String cardNumber, @RequestParam("expiryMonth") String expiryMonth, @RequestParam("expiryYear") String expiryYear,
+			@RequestParam("cvv") int cvv) {
+		String trimmedCardNumber = cardNumber.replaceAll(" ", "");
+
+		String expiryYearMonth = expiryYear + "-" + expiryMonth;
+
+		List<Cards> cardDetails = walletImpl.checkCard(cardNumber, expiryYearMonth, cvv);
+		
+			for(Cards cards : cardDetails) {
+				System.out.println("000" + cards.getCardNumber());
+				
+				if(cardDetails != null) {
+					System.err.println("payment successful");
+				}else {
+					System.out.println("unsuccessful");
+				}
+			}		
+		
+		return "CardPayment.jsp";
 	}
 	
 	@PostMapping("/Logout")

@@ -583,12 +583,12 @@ opacity: 100%;
 						<p class="card-text">to any Digipay User or Bank Account.</p>
 	
 							<button 
-							 onclick="window.location.href='WalletTransfer.jsp'" 
+							 onclick="window.location.href='WalletTransfer'" 
 							style="background-color: #3c445c; border-color: black;"
 							class="btn btn-primary">Transfer</button>
 						
 							<button
-							 onclick="window.location.href='LinkAccount.jsp'" 
+							 onclick="window.location.href='CardPayment.jsp'" 
 							style="background-color: #3c445c; border-color: black;"
 							class="btn btn-primary">Card</button>
 							

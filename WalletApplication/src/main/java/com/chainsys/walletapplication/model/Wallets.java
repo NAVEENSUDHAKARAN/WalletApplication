@@ -1,5 +1,8 @@
 package com.chainsys.walletapplication.model;
 
+import org.springframework.stereotype.Repository;
+
+@Repository
 public class Wallets {
 
 	String walletId;

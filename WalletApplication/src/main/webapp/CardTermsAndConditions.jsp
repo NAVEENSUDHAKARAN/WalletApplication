@@ -37,9 +37,7 @@
         <p>To get a card, Rupees 200 will be deducted from your wallet.</p>
         <p>The card's expiry date will be three years from the date of application.</p>
     
-    
-    <form action="CardTransfer" method="post">
-    	<input type="hidden" name="action" value="createCard" >
+    <form action="CreateCard" method="post">
         <input type="checkbox" id="agreeCheckbox" onchange="toggleButton()"> I agree<br><br>
         <button type="submit" id="okButton" name="submitButton" disabled>OK</button>
         <button type="button" id="cancelButton" onclick="window.location.href='profile.jsp'" name="submitButton" >Cancel</button>

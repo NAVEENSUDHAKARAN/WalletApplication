@@ -21,12 +21,14 @@ import com.chainsys.walletapplication.mapper.CardUserID;
 import com.chainsys.walletapplication.mapper.CheckLogin;
 import com.chainsys.walletapplication.mapper.CheckPassword;
 import com.chainsys.walletapplication.mapper.CheckWalletId;
+import com.chainsys.walletapplication.mapper.GetEmail;
 import com.chainsys.walletapplication.mapper.GetUserId;
 import com.chainsys.walletapplication.mapper.GetUserName;
 import com.chainsys.walletapplication.mapper.GetWalletBalance;
 import com.chainsys.walletapplication.mapper.GetWalletId;
 import com.chainsys.walletapplication.mapper.TransactionDetails;
 import com.chainsys.walletapplication.mapper.UserDetails;
+import com.chainsys.walletapplication.mapper.CheckCardDetails;
 import com.chainsys.walletapplication.model.BankAccounts;
 import com.chainsys.walletapplication.model.Cards;
 import com.chainsys.walletapplication.model.Transactions;
@@ -268,20 +270,35 @@ public class WalletImpl implements WalletDAO {
 		jdbcTemplate.update(query, params);
 	}
 	
-	public void createWalletId(Wallets walletInfo) {
+	public void createWalletId(Wallets wallets) {
 		String query = "INSERT INTO wallets (wallet_id, user_id, balance, qr) VALUES (?, ?, ?, ?)";
-		System.out.println("Chumma dha irukku");
+		Object[] params = {wallets.getWalletId(), wallets.getId(), 0, wallets.getImage()};
+		jdbcTemplate.update(query, params);
 	}
 
 	public boolean checkWalletId(int id) {
 		String query = "SELECT wallet_id FROM wallets WHERE user_id = ?";
-		return jdbcTemplate.queryForObject(query, new CheckWalletId(), id) != null;
+		try {
+			return jdbcTemplate.queryForObject(query, new CheckWalletId(), id) != null;
+		}catch(Exception e) {
+			return false;
+		}
 	}
 
 	public String getWalletId(int id) {
 		String query = "SELECT wallet_id FROM wallets WHERE user_id = ?";
-		return jdbcTemplate.queryForObject(query, new GetWalletId(), id);
+		try {
+			return jdbcTemplate.queryForObject(query, new GetWalletId(), id);
+		}catch(Exception e) {
+			return null;
+		}
 	}
+	
+	public String getEmail(int id){
+		String query = "SELECT email FROM users WHERE user_id = ?";
+		return jdbcTemplate.queryForObject(query, new GetEmail(), id);
+	}
+	
 	
 	public void deductWalletBalance(String walletId, double amount) {
 		String query = "update wallets set balance = ? where wallet_id = ?";
@@ -293,5 +310,30 @@ public class WalletImpl implements WalletDAO {
 		String query = "INSERT INTO transactions (transaction_id, sender_wallet_id, receiver_wallet_id, DataAndTime, amount) VALUES (?,?,?,?,?)";
 		Object[] params = {transactionIdGenerator(), senderId, receiverId, LocalDateTime.now(), amount};
 		jdbcTemplate.update(query, params);
+	}
+	
+	public void setCardDetails(Cards cards) {
+		String query = "insert into cards (user_id, cardnumber, applied_date, expiry_date, cvv) values (?,?,?,?,?)";
+		Object[] params = {cards.getId(), cards.getCardNumber(), cards.getAppliedDate(), cards.getExpiryDate(), cards.getCvv()};
+		jdbcTemplate.update(query, params);
+	}
+	
+	public void deductionForCardApply(int userId) {
+		String query = "update wallets set balance = ? where user_id = ?";
+		double updatedAmount = getWalletBalance(userId) - 200;
+		jdbcTemplate.update(query, updatedAmount, userId);
+	}
+
+	@Override
+	public List<Cards> checkCard(String cardNumber, String expiryYear, int cvv) {
+		String query = "select cardnumber, expiry_date, cvv from cards where cardnumber =? and expiry_date = ? and cvv =?";
+		Object[] params = {cardNumber, expiryYear, cvv};
+		System.out.println("in check cards");
+		try {
+			return jdbcTemplate.query(query, new CheckCardDetails(), params);
+		}catch(Exception e) {
+			
+			return null;
+		}
 	}
 }

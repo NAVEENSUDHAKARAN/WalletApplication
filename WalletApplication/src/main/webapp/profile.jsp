@@ -519,9 +519,9 @@ body {
                     </div><br>
            <%} %> 
 
-			<%
-			if((boolean) id.getAttribute("userIdFromCards")){
-			%>	
+		<%
+		if(walletImpl.getUserIdFromCards(userId)){
+		%>	
 			<div id="debitCard" class="card-mockup flex-vertical snipcss0-0-0-1 snipcss-c6oPp">
 		    <img id="logo" src="images/DigiPayNoBG.png" alt="logo" height="40px" width="40px" ><br>
 		    <div class="snipcss0-1-1-3">
@@ -533,7 +533,7 @@ body {
             <div id="name_mock" class="size-md pb-sm uppercase ellipsis snipcss0-3-4-5" style="">Mr. <%= userName %></div>
         </strong>
         <% }
-        	List<Cards> cardDetails =(List<Cards>) id.getAttribute("cardDetails");
+        	List<Cards> cardDetails = walletImpl.readCardDetails(userId);
             for(Cards cardInfo : cardDetails){
         %>
         <div class="size-md pb-md snipcss0-2-3-6">

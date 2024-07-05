@@ -87,10 +87,16 @@
  </style>
 <body>
 <%
-int id = (int) session.getAttribute("userid");
+	ApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+	WalletImpl walletImpl = (WalletImpl) context.getBean("walletImpl");
+	int id = (int) session.getAttribute("userid");
     System.out.println("parsed Value : " + id);
-    ApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
-    WalletImpl walletImpl = (WalletImpl) context.getBean("walletImpl");
+	if(walletImpl.getWalletId(id) == null){
+		
+	}
+	
+
+    
 %>
   <section style="background-color: #eee;">
   <div class="container py-5">
