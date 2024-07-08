@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.chainsys.walletapplication.dao.DynamicQR;
 import com.chainsys.walletapplication.dao.WalletImpl;
 import com.chainsys.walletapplication.model.BankAccounts;
 import com.chainsys.walletapplication.model.Cards;
+import com.chainsys.walletapplication.model.MobileRecharge;
 import com.chainsys.walletapplication.model.Users;
 import com.chainsys.walletapplication.model.Wallets;
 
@@ -37,6 +39,9 @@ public class UserController {
 	
 	@Autowired
 	Wallets wallets;
+	
+	@Autowired
+	MobileRecharge mobile;
 	
 	@RequestMapping("/")
 	public String home() {
@@ -63,7 +68,7 @@ public class UserController {
 		if (!walletImpl.retrieveUserCred(users)) {
 			walletImpl.setUserDetails(users);
 			walletImpl.createAccount(account, walletImpl.getUserID(users));
-			return "LoginPage.jsp";
+			return "/CreateWalletId";
 		} else {
 			model.addAttribute("message", "Account Already Exist");
 			return "Register.jsp";
@@ -91,17 +96,40 @@ public class UserController {
 
 	}
 	
-	@PostMapping("/CreateAccount")
+	@PostMapping("/CreateWalletId")
+	public String createWalletId(Model model) throws UnknownHostException {
+		int userId = walletImpl.getUserID(users);
+		
+		String email = walletImpl.getEmail(userId);
+		String[] splitedEmail = email.split("@");
+		String walletId = splitedEmail[0] + "@digipay";
+		
+		model.addAttribute("walletID", walletId);
+		if(!walletImpl.checkWalletId(userId))
+		{
+			InetAddress localhost = InetAddress.getLocalHost();
+	        DynamicQR.generateQr(walletImpl.getUserName(userId),localhost.getHostAddress()+":8080/WalletApplication/MobileTransaction.jsp?id=" + userId+"&walletId="+ walletId,wallets);
+	       				        
+			wallets.setId(userId);
+			wallets.setWalletId(walletId);
+			
+			walletImpl.createWalletId(wallets);
+			return "LandingPage.jsp";
+		}
+		return "LandingPage.jsp";
+
+	}
+	
+	@PostMapping("/DepositAmount")
 	public String createAccount(@RequestParam("accountNumber") String accountNumber, @RequestParam("amount") double amount, 
 			@RequestParam("password") String password, Model model) {
 		int userId = walletImpl.getUserID(users);
-
+	
 		if(walletImpl.checkAccountNumber(userId, accountNumber) && walletImpl.checkPassword(userId, password)) {
 			amount += walletImpl.getAvailableBalance(accountNumber);
 			walletImpl.depositAmount(accountNumber, amount);
 			double balance = walletImpl.getAvailableBalance(accountNumber);
 			model.addAttribute("balance", balance);
-			return "LandingPage.jsp";
 		}
 		else if(!walletImpl.checkPassword(userId, password))
 		{
@@ -149,30 +177,9 @@ public class UserController {
 				@RequestParam("receiverWalletId") String receiverId, @RequestParam("password") String password, Model model) throws UnknownHostException {
 		System.err.println("-----");
 		
-		if(!walletImpl.checkWalletId(userId))
-		{
-			String email = walletImpl.getEmail(userId);
-			String[] splitedEmail = email.split("@");
-			String walletId = splitedEmail[0] + "@digipay";
-			
-			model.addAttribute("walletID", walletId);
-			if(!walletImpl.checkWalletId(userId))
-			{
-				InetAddress localhost = InetAddress.getLocalHost();
-		        //DynamicQR.generateQr(walletId.getUserName(userId),localhost.getHostAddress()+":8080/WalletApplication/MobileTransaction.jsp?id=" + id+"&walletId="+ walletId,walletInfo);
-		       				        
-				wallets.setId(userId);
-				wallets.setWalletId(walletId);
-				
-				walletImpl.createWalletId(wallets);
-				return "WalletTransfer.jsp";
-			}
-			
-		}
-		
-		
 		if(walletImpl.checkWalletId(receiverId) && walletImpl.checkWalletId(senderId) && walletImpl.checkPassword(userId, password)) {
 			walletImpl.deductWalletBalance(senderId, amountToSend);
+			amountToSend += walletImpl.getWalletBalance(receiverId);
 			walletImpl.updateWalletBalance(amountToSend, receiverId);
 			walletImpl.updateTransactionHistory(senderId, receiverId, amountToSend);
 			return "LandingPage.jsp";
@@ -207,22 +214,37 @@ public class UserController {
 	
 	@PostMapping("/CardPayment")
 	public String cardPayment(@RequestParam("cardNumber") String cardNumber, @RequestParam("expiryMonth") String expiryMonth, @RequestParam("expiryYear") String expiryYear,
-			@RequestParam("cvv") int cvv) {
+			@RequestParam("cvv") int cvv, Model model) {
+		int userId = walletImpl.getUserID(users);
 		String trimmedCardNumber = cardNumber.replaceAll(" ", "");
-
+		System.err.println("--->" + trimmedCardNumber);
+		double amount = mobile.getPlan();
 		String expiryYearMonth = expiryYear + "-" + expiryMonth;
 
-		List<Cards> cardDetails = walletImpl.checkCard(cardNumber, expiryYearMonth, cvv);
-		
-			for(Cards cards : cardDetails) {
-				System.out.println("000" + cards.getCardNumber());
-				
-				if(cardDetails != null) {
-					System.err.println("payment successful");
-				}else {
+		if(walletImpl.checkCard(trimmedCardNumber, expiryYearMonth, cvv)) {
+			 walletImpl.deductWalletBalance(walletImpl.getWalletId(userId), amount);
+			 return "LandingPage.jsp";
+		}
+		else {
 					System.out.println("unsuccessful");
-				}
-			}		
+	}
+					
+		
+		return "CardPayment.jsp";
+	}
+	
+	@PostMapping("/MobileRecharge")
+	public String mobileRecharge(@RequestParam("type") String rechargeType, @RequestParam("network") String network,@RequestParam("mobileNumber") String mobileNumber,@RequestParam("rechargePlan") double plan,
+			Model model) {
+		int userId = walletImpl.getUserID(users);
+		
+		mobile.setRechargeType(rechargeType);
+		mobile.setNetwork(network);
+		mobile.setPlan(plan);
+		mobile.setMobileNumber(mobileNumber);
+		
+		model.addAttribute("rechargeType", "mobileRecharge");
+		model.addAttribute("rechargeDetails",mobile);
 		
 		return "CardPayment.jsp";
 	}

@@ -515,7 +515,7 @@ body {
 	                        <h4 class="text-right">Balance</h4>
 	                    </div>
                     <div class="col-md-12">
-                        <input type="text" class="form-control" placeholder="experience" value="<%= bankAccountInfo.getAmount() %>">
+                        <input type="text" class="form-control" placeholder="experience" value="<%= walletImpl.getBalance(userId) %>">
                     </div><br>
            <%} %> 
 

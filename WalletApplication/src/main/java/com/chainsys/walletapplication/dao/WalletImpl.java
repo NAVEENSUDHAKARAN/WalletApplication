@@ -255,6 +255,7 @@ public class WalletImpl implements WalletDAO {
 	public void deductBankBalance(int id, double amount) {
 		String query = "UPDATE bank_accounts SET balance = ? WHERE user_id = ?";
 		double updatedAmount = getBalance(id) - amount;
+		System.err.println("deductedAmount : " + updatedAmount + " " + amount);
 		jdbcTemplate.update(query, updatedAmount, id);	
 	}
 	
@@ -265,8 +266,7 @@ public class WalletImpl implements WalletDAO {
 	
 	public void updateWalletBalance(double balance, String walletId) {
 		String query = "update wallets set balance = ? where wallet_id = ?";
-		double amountToUpdate = balance + getWalletBalance(walletId);
-		Object[] params = {amountToUpdate, walletId};
+		Object[] params = {balance, walletId};
 		jdbcTemplate.update(query, params);
 	}
 	
@@ -303,6 +303,7 @@ public class WalletImpl implements WalletDAO {
 	public void deductWalletBalance(String walletId, double amount) {
 		String query = "update wallets set balance = ? where wallet_id = ?";
 		double updatedAmount = getWalletBalance(walletId) - amount;
+		System.err.println("deductbalance ---> " + updatedAmount);
 		jdbcTemplate.update(query,updatedAmount, walletId);
 	}
 	
@@ -325,15 +326,16 @@ public class WalletImpl implements WalletDAO {
 	}
 
 	@Override
-	public List<Cards> checkCard(String cardNumber, String expiryYear, int cvv) {
+	public boolean checkCard(String cardNumber, String expiryYear, int cvv) {
 		String query = "select cardnumber, expiry_date, cvv from cards where cardnumber =? and expiry_date = ? and cvv =?";
+		System.err.println("---> " + cardNumber);
 		Object[] params = {cardNumber, expiryYear, cvv};
 		System.out.println("in check cards");
 		try {
-			return jdbcTemplate.query(query, new CheckCardDetails(), params);
+			return jdbcTemplate.queryForObject(query, new CheckCardDetails(), params) != null;
 		}catch(Exception e) {
 			
-			return null;
+			return false;
 		}
 	}
 }

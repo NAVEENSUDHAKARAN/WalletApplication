@@ -168,8 +168,7 @@
 	<div id="mainDiv">
 		<div class="container">
 			<h2>Mobile Recharge</h2>
-			<form action="CardTransfer" method="post">
-				<input type="hidden" name="action" value="mobileRecharge" >
+			<form action="MobileRecharge" method="post">
 				<label for="type">Select Type:</label>
 				<input type="radio" id="prepaid" name="type" value="prepaid" checked> <span>PrePaid</span>
 				<input type="radio" id="postpaid" name="type" value="postpaid"> <span>PostPaid</span><br><br>
@@ -190,9 +189,9 @@
 				<label for="rechargePlan">Select Recharge Plan:</label>
 				<select id="rechargePlan" name="rechargePlan" class="form-control" required>
 					<option value="">-- Select Recharge Plan --</option>
-					<option value="Plan 1">19rupees</option>
-					<option value="Plan 2">99rupees</option>
-					<option value="Plan 3">699rupees</option>
+					<option value="19">19rupees</option>
+					<option value="99">99rupees</option>
+					<option value="699">699rupees</option>
 					<!-- Add more options as needed -->
 				</select><br><br>
 
