@@ -1,3 +1,4 @@
+<%@page import="java.awt.Window"%>
 <%@page import="org.springframework.web.context.support.WebApplicationContextUtils"%>
 <%@page import="org.springframework.context.ApplicationContext"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
@@ -19,298 +20,296 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-
-
 <title>Home</title>
 </head>
 <style>
-body {
-	padding: 0;
-	margin: 0;
-	overflow-x: hidden;
-}
-
-#navbarDiv {
-	position: sticky;
-	display: flex;
-	width: 110vw;
-	height: 90px;
-	box-shadow: 5px 5px 3px 0px grey;
-	z-index: 10;
-}
-
-#logoDiv {
-	position: relative;
-	left: 5%;
-	top: 5%;
-	width: 100px;
-	height: 80px;
-}
-
-#dropDown {
-	position: relative;
-	width: 10%;
-	height: 50%;
-	left: 20%;
-	top: 30%;
-}
-
-#optionsDiv {
-	position: relative;
-	width: 55%;
-	height: 90px;
-	left: 5%;
-	gap: 50px;
-
-}
-
-
-#contentDiv {
-
-	font-size: x-large;
-	position: relative;
-	display: flex;
-	width: 90%;
-	height: 50%;
-	gap: 70px;
-	left: 40%;
-	top: 20%;
-	justify-content: space-around;
-	color: #3c445c;
-}
-
-#help:hover, #login:hover {
-	cursor: pointer;
-	color: black;
-}
-
-#registerBtn {
-	background-color: #3c445c;
-	border: none;
-	color: white;
-	width: 30%;
-	height: 50px;
-	padding: 10px 20px;
-	text-align: center;
-	text-decoration: none;
-	display: inline-block;
-	font-size: 16px;
-	margin: 4px 2px;
-	cursor: pointer;
-	border-radius: 5px;
-}
-
-#registerBtn:hover {
-	background-color: black;
-}
-
-#registerBtn:active {
-	background-color: #3c445c;
-}
-
-#logoutBtn {
-	background-color: #3c445c;
-	border: none;
-	color: white;
-	width: 100%;
-	height: 50px;
-	padding: 10px 20px;
-	text-align: center;
-	text-decoration: none;
-	display: inline-block;
-	font-size: 16px;
-	margin: 4px 2px;
-	cursor: pointer;
-	border-radius: 5px;
-}
-
-#dropdown{
-	border: none;
-	color: white;
-	width: 100%;
-	height: 50px;
-	padding: 10px 20px;
-	text-align: center;
-	text-decoration: none;
-	display: inline-block;
-	font-size: 16px;
-	margin: 4px 2px;
-	cursor: pointer;
-	border-radius: 5px;
-}
-
-#profile {
-
-	position: relative;
-	bottom: 50px;
-}
-
-#logoutBtn:hover {
-	background-color: black;
-}
-
-#logoutBtn:active {
-	background-color: #3c445c;
-}
-
-#login {
-	text-decoration: none;
-	color: #3c445c;
-}
-
-#secondDiv {
-	background-color: #F5F5F5;
-	height: 59vh; 
-	width: 50%;
-
+	body {
+		padding: 0;
+		margin: 0;
+		overflow-x: hidden;
+	}
 	
-}
-
-#text1 {
-	font-size: xxx-large;
-	font-weight: bolder;
-	font-style: italic;
-	position: relative;
-	top: 15%;
-	left: 10%;
-
-	transition: ease-in 600ms;
-	display: flex;
-	flex-direction: column;
+	#navbarDiv {
+		position: sticky;
+		display: flex;
+		width: 110vw;
+		height: 90px;
+		box-shadow: 5px 5px 3px 0px grey;
+		z-index: 10;
+	}
 	
-}
-
-#text1 {
-	animation: 2s slide-right;
-}
-
-@keyframes slide-right {from { margin-left:-100%;
+	#logoDiv {
+		position: relative;
+		left: 5%;
+		top: 5%;
+		width: 100px;
+		height: 80px;
+	}
 	
-}
-
-to {
-	margin-left: 0%;
-}
-
-}
-#text2 {
-	font-style: italic;
-	position: relative;
-	top: 20%;
-	left: 10%;
-	width: 60%;
-}
-
-#parallelogramDiv {
-	position: absolute;
-	height: 70vh;
-	background-color: white;
-	transform: skew(-20deg);
-	left: 50%;
-	height: 59%;; 
-	border-left: 5px solid #3c445c;
-
+	#dropDown {
+		position: relative;
+		width: 10%;
+		height: 50%;
+		left: 20%;
+		top: 30%;
+	}
 	
-}
-
-#innerSignUp, #innerLearnMore {
-	width: 25%;
-	position: relative;
-	left: 20%;
-	top: 20%;
-	padding: 10px;
-	border: none;
-	border-radius: 3px;
-	background-color: #3c445c;
-	color: #fff;
-	cursor: pointer;
-}
-
-#innerSignUp:hover, #innerLearnMore:hover {
-	background-color: black;
-}
-
-#innerBtns {
-	animation: 3s slide-right;
-	position: relative;
-	top: 20%;
-}
-
-@keyframes slide-left {from { margin-left:100%;
+	#optionsDiv {
+		position: relative;
+		width: 55%;
+		height: 90px;
+		left: 5%;
+		gap: 50px;
 	
-}
-
-to {
-	margin-left: 0%;
-}
-
-}
-#parallelogramImg{
-	height: 60vh;
-	padding-left: 30%;
-}
-
-#functionalities {
-	position: relative;
-	height: 40vh;
-	width: 100vw;
-	padding: 50px;
-
-}
-
-#footerDiv {
+	}
 	
-	height: 30vh;
-	width: 98.6vw;
-	display: flex;
-	position: absolute;
-}
-
-#mediaTag {
-	background-color: black;
-	width: 30%;
-	height: 100%;
-	position: relative;
-}
-
-#icons {
-	position: relative;
-	width: 50%;
-	height: 25%;
-	left: 45px;
-	top: 20px;
-}
-
-#copyRightDiv {
-	background-color: black;
-	color: white;
-	width: 45%;
-	height: 100%;
-}
-
-#addressDiv {
-	position:relative;
-	background-color: whitesmoke;
-	width: 25%;
-	height: 100%;
-}
-
-
-#copyRightsText {
-	position: relative;
-	top: 25%;
-}
-
-#dropdown-menu {
-	z-index: 10;
-}
-
-.box {
-	display: flex;
-	background: rgb(245,245,245);
-	background: linear-gradient(90deg, rgba(245,245,245,1) 70%, rgba(255,255,255,1) 30%, rgba(255,255,255,1) 51%);
-
-}
+	
+	#contentDiv {
+	
+		font-size: x-large;
+		position: relative;
+		display: flex;
+		width: 90%;
+		height: 50%;
+		gap: 70px;
+		left: 40%;
+		top: 20%;
+		justify-content: space-around;
+		color: #3c445c;
+	}
+	
+	#help:hover, #login:hover {
+		cursor: pointer;
+		color: black;
+	}
+	
+	#registerBtn {
+		background-color: #3c445c;
+		border: none;
+		color: white;
+		width: 30%;
+		height: 50px;
+		padding: 10px 20px;
+		text-align: center;
+		text-decoration: none;
+		display: inline-block;
+		font-size: 16px;
+		margin: 4px 2px;
+		cursor: pointer;
+		border-radius: 5px;
+	}
+	
+	#registerBtn:hover {
+		background-color: black;
+	}
+	
+	#registerBtn:active {
+		background-color: #3c445c;
+	}
+	
+	#logoutBtn {
+		background-color: #3c445c;
+		border: none;
+		color: white;
+		width: 100%;
+		height: 50px;
+		padding: 10px 20px;
+		text-align: center;
+		text-decoration: none;
+		display: inline-block;
+		font-size: 16px;
+		margin: 4px 2px;
+		cursor: pointer;
+		border-radius: 5px;
+	}
+	
+	#dropdown{
+		border: none;
+		color: white;
+		width: 100%;
+		height: 50px;
+		padding: 10px 20px;
+		text-align: center;
+		text-decoration: none;
+		display: inline-block;
+		font-size: 16px;
+		margin: 4px 2px;
+		cursor: pointer;
+		border-radius: 5px;
+	}
+	
+	#profile {
+	
+		position: relative;
+		bottom: 50px;
+	}
+	
+	#logoutBtn:hover {
+		background-color: black;
+	}
+	
+	#logoutBtn:active {
+		background-color: #3c445c;
+	}
+	
+	#login {
+		text-decoration: none;
+		color: #3c445c;
+	}
+	
+	#secondDiv {
+		background-color: #F5F5F5;
+		height: 59vh; 
+		width: 50%;
+	
+		
+	}
+	
+	#text1 {
+		font-size: xxx-large;
+		font-weight: bolder;
+		font-style: italic;
+		position: relative;
+		top: 15%;
+		left: 10%;
+	
+		transition: ease-in 600ms;
+		display: flex;
+		flex-direction: column;
+		
+	}
+	
+	#text1 {
+		animation: 2s slide-right;
+	}
+	
+	@keyframes slide-right {from { margin-left:-100%;
+		
+	}
+	
+	to {
+		margin-left: 0%;
+	}
+	
+	}
+	#text2 {
+		font-style: italic;
+		position: relative;
+		top: 20%;
+		left: 10%;
+		width: 60%;
+	}
+	
+	#parallelogramDiv {
+		position: absolute;
+		height: 70vh;
+		background-color: white;
+		transform: skew(-20deg);
+		left: 50%;
+		height: 59%;; 
+		border-left: 5px solid #3c445c;
+	
+		
+	}
+	
+	#innerSignUp, #innerLearnMore {
+		width: 25%;
+		position: relative;
+		left: 20%;
+		top: 20%;
+		padding: 10px;
+		border: none;
+		border-radius: 3px;
+		background-color: #3c445c;
+		color: #fff;
+		cursor: pointer;
+	}
+	
+	#innerSignUp:hover, #innerLearnMore:hover {
+		background-color: black;
+	}
+	
+	#innerBtns {
+		animation: 3s slide-right;
+		position: relative;
+		top: 20%;
+	}
+	
+	@keyframes slide-left {from { margin-left:100%;
+		
+	}
+	
+	to {
+		margin-left: 0%;
+	}
+	
+	}
+	#parallelogramImg{
+		height: 60vh;
+		padding-left: 30%;
+	}
+	
+	#functionalities {
+		position: relative;
+		height: 40vh;
+		width: 100vw;
+		padding: 50px;
+	
+	}
+	
+	#footerDiv {
+		
+		height: 30vh;
+		width: 98.6vw;
+		display: flex;
+		position: absolute;
+	}
+	
+	#mediaTag {
+		background-color: black;
+		width: 30%;
+		height: 100%;
+		position: relative;
+	}
+	
+	#icons {
+		position: relative;
+		width: 50%;
+		height: 25%;
+		left: 45px;
+		top: 20px;
+	}
+	
+	#copyRightDiv {
+		background-color: black;
+		color: white;
+		width: 45%;
+		height: 100%;
+	}
+	
+	#addressDiv {
+		position:relative;
+		background-color: whitesmoke;
+		width: 25%;
+		height: 100%;
+	}
+	
+	
+	#copyRightsText {
+		position: relative;
+		top: 25%;
+	}
+	
+	#dropdown-menu {
+		z-index: 10;
+	}
+	
+	.box {
+		display: flex;
+		background: rgb(245,245,245);
+		background: linear-gradient(90deg, rgba(245,245,245,1) 70%, rgba(255,255,255,1) 30%, rgba(255,255,255,1) 51%);
+	
+	}
 
 
      #dropdown.dropdown-toggle:hover {
@@ -445,6 +444,26 @@ opacity: 100%;
 
 </style>
 <body>
+<div class="modal fade" id="electricityModal" tabindex="-1" role="dialog" aria-labelledby="electricityModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style=" padding: 0; " >
+            <div class="modal-body" style=" padding: 0; " >
+                
+            </div>
+       </div>
+    </div>
+</div>
+
+<div class="modal fade" id="dthModal" tabindex="-1" role="dialog" aria-labelledby="electricityModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content"  style="padding: 0; border-radius: 0; width:max-content; border-radius: 5px;">
+            <div class="modal-body" style="padding: 0; background-color: #fff;  border-radius: 5px;" >
+                
+            </div>
+       </div>
+    </div>
+</div>
+
 
 	<%
 	if (session == null) {
@@ -617,14 +636,15 @@ opacity: 100%;
         </div>
         
         <div class="bill-type">
-            <a href="/online-bill-payment/electricity">
-                <img src="https://akam.cdn.jdmagicbox.com/images/icontent/newwap/web2022/bt_electricity.svg?w=128&amp;q=75" alt="Electricity">
-                <p>Electricity</p>
-            </a>
-        </div>
+		    <a onclick="openElectricityModal()" data-toggle="modal" data-target="#electricityModal">
+		        <img src="https://akam.cdn.jdmagicbox.com/images/icontent/newwap/web2022/bt_electricity.svg?w=128&amp;q=75" alt="Electricity">
+		        <p>Electricity</p>
+		    </a>
+		</div>
+		        
         
         <div class="bill-type">
-            <a href="/online-bill-payment/dth-recharge">
+            <a onclick="openDTHModal()" data-toggle="modal" data-target="#dthModal">
                 <img src="https://akam.cdn.jdmagicbox.com/images/icontent/newwap/web2022/bt_dth.svg?w=128&amp;q=75" alt="DTH">
                 <p>DTH</p>
             </a>
@@ -694,55 +714,34 @@ opacity: 100%;
 			</div>
 		</div>
 	</div>
+	
+
+
 </body>
 <script>
-function openTransferDialog() {
 
-	 var valueToSend = "WalletTransfer";
-	$.ajax({
-        url: "UserController",
-        method: "post",
-        data:{
-        	action: valueToSend
-        },
-        success: function(response) {
-            console.log("AJAX success");
- 			
-            <%
-            Integer userId = (Integer) session.getAttribute("userid");
-            if (userId != null) {
-            %>
-                
-                window.location.href = "WalletTransfer.jsp?id=<%= userId %>";
-           <% } %>
-        	 
-        },
-        error: function(xhr, status, error) {
-            console.error("AJAX error:", error);
-            
-            Swal.fire({
-                icon: 'info',
-                title: 'Enter Account Number',
-                html: '<form id="transferForm" action="CreateAccount" method="post">' +
-                    '<input type="hidden" name="action" value="transfer">' +
-                    '<input id="amountInput" class="swal2-input" name="accountNumber" type="text" placeholder="Enter Account Number">' +
-                    '</form>',
-                showCancelButton: true,
-                confirmButtonText: 'Ok',
-                cancelButtonText: 'Cancel',
-                showLoaderOnConfirm: true,
-                preConfirm: () => {
-                    
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                   
-                    document.getElementById('transferForm').submit();
-                }
-            });
-        }
+function openElectricityModal() {	
+	  // Use jQuery to load content dynamically into modal body
+	  $('#electricityModal .modal-body').load('ElectricityCustomerData.jsp', function(response, status, xhr) {
+	    if (status == "error") {
+	      console.error("Error loading content:", xhr.status, xhr.statusText);
+	      // Optionally handle error, show message, or fallback
+	    } else {
+	      $('#electricityModal').modal('show'); // Show the modal after content is loaded
+	    }
+	  });
+}
 
-    });
+function openDTHModal() {	
+	  // Use jQuery to load content dynamically into modal body
+	  $('#dthModal .modal-body').load('DTHRecharge.jsp', function(response, status, xhr) {
+	    if (status == "error") {
+	      console.error("Error loading content:", xhr.status, xhr.statusText);
+	      // Optionally handle error, show message, or fallback
+	    } else {
+	      $('#dthModal').modal('show'); // Show the modal after content is loaded
+	    }
+	  });
 }
 
 document.addEventListener('DOMContentLoaded', function() {

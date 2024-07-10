@@ -3,12 +3,10 @@ package com.chainsys.walletapplication.controller;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.YearMonth;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,6 +15,8 @@ import com.chainsys.walletapplication.dao.DynamicQR;
 import com.chainsys.walletapplication.dao.WalletImpl;
 import com.chainsys.walletapplication.model.BankAccounts;
 import com.chainsys.walletapplication.model.Cards;
+import com.chainsys.walletapplication.model.DTHRecharge;
+import com.chainsys.walletapplication.model.EBConsumerData;
 import com.chainsys.walletapplication.model.MobileRecharge;
 import com.chainsys.walletapplication.model.Users;
 import com.chainsys.walletapplication.model.Wallets;
@@ -24,6 +24,7 @@ import com.chainsys.walletapplication.model.Wallets;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.websocket.Session;
 
 @Controller
 public class UserController {
@@ -42,6 +43,12 @@ public class UserController {
 	
 	@Autowired
 	MobileRecharge mobile;
+	
+	@Autowired
+	EBConsumerData consumerData;
+	
+	@Autowired
+	DTHRecharge dthRecharge;
 	
 	@RequestMapping("/")
 	public String home() {
@@ -159,6 +166,7 @@ public class UserController {
 			walletImpl.deductBankBalance(userId, amountToSend);
 			amountToSend += walletImpl.getWalletBalance(receiverWalletId);
 			walletImpl.updateWalletBalance(amountToSend, receiverWalletId);
+			model.addAttribute("invalidWalletIdMsg", "qwerty");
 			return "LandingPage.jsp";
 		}
 		else if(senderAccNo == null) {
@@ -174,7 +182,7 @@ public class UserController {
 	
 	@PostMapping("/WalletTransfer")
 	public String walletTransfer(@RequestParam("userId") int userId, @RequestParam("amountToSend") double amountToSend, @RequestParam("senderWalletId") String senderId,
-				@RequestParam("receiverWalletId") String receiverId, @RequestParam("password") String password, Model model) throws UnknownHostException {
+				@RequestParam("receiverWalletId") String receiverId, @RequestParam("password") String password, Model model) {
 		System.err.println("-----");
 		
 		if(walletImpl.checkWalletId(receiverId) && walletImpl.checkWalletId(senderId) && walletImpl.checkPassword(userId, password)) {
@@ -182,6 +190,7 @@ public class UserController {
 			amountToSend += walletImpl.getWalletBalance(receiverId);
 			walletImpl.updateWalletBalance(amountToSend, receiverId);
 			walletImpl.updateTransactionHistory(senderId, receiverId, amountToSend);
+			model.addAttribute("alertMessage", "okay");
 			return "LandingPage.jsp";
 		}
 		else if(!walletImpl.checkPassword(userId, password)){
@@ -214,29 +223,28 @@ public class UserController {
 	
 	@PostMapping("/CardPayment")
 	public String cardPayment(@RequestParam("cardNumber") String cardNumber, @RequestParam("expiryMonth") String expiryMonth, @RequestParam("expiryYear") String expiryYear,
-			@RequestParam("cvv") int cvv, Model model) {
+			@RequestParam("cvv") int cvv, Model model, @RequestParam("totalAmount") double totalAmount) {
 		int userId = walletImpl.getUserID(users);
 		String trimmedCardNumber = cardNumber.replaceAll(" ", "");
 		System.err.println("--->" + trimmedCardNumber);
-		double amount = mobile.getPlan();
+		System.out.println("(-----)" + totalAmount);
+		System.err.println("<--->" + userId);
+		/* double amount = mobile.getPlan(); */
 		String expiryYearMonth = expiryYear + "-" + expiryMonth;
 
 		if(walletImpl.checkCard(trimmedCardNumber, expiryYearMonth, cvv)) {
-			 walletImpl.deductWalletBalance(walletImpl.getWalletId(userId), amount);
+			 walletImpl.deductWalletBalance(walletImpl.getWalletId(userId), totalAmount);
 			 return "LandingPage.jsp";
 		}
 		else {
 					System.out.println("unsuccessful");
 	}
-					
-		
 		return "CardPayment.jsp";
 	}
 	
 	@PostMapping("/MobileRecharge")
 	public String mobileRecharge(@RequestParam("type") String rechargeType, @RequestParam("network") String network,@RequestParam("mobileNumber") String mobileNumber,@RequestParam("rechargePlan") double plan,
 			Model model) {
-		int userId = walletImpl.getUserID(users);
 		
 		mobile.setRechargeType(rechargeType);
 		mobile.setNetwork(network);
@@ -246,6 +254,42 @@ public class UserController {
 		model.addAttribute("rechargeType", "mobileRecharge");
 		model.addAttribute("rechargeDetails",mobile);
 		
+		return "CardPayment.jsp";
+	}
+	
+	@PostMapping("/ConsumerData")
+	public String consumerData(@RequestParam("consumerName") String name, @RequestParam("consumerNumber") String consumerNumber, @RequestParam("serviceNumber") String serviceNumber,
+			HttpSession session) {
+		System.out.println("---->" + name);
+		consumerData.setName(name);
+		consumerData.setConsumerNumber(consumerNumber);
+		consumerData.setSerialNumber(serviceNumber);
+		session.setAttribute("ebDetails",consumerData);
+		return "ElectricityPayment.jsp";
+	}
+	
+	@PostMapping("/ElectricityRecharge")
+	public String electricityRecharge(@RequestParam("billAmount") String amount, Model model) {
+		model.addAttribute("rechargeType", "electricityRecharge");
+		System.err.println("Amount -----> " + amount);
+		double billAmount = Double.parseDouble(amount);
+		consumerData.setBillAmount(billAmount);
+		double taxAmount = billAmount + (billAmount/100)*5;
+		model.addAttribute("taxAmount", taxAmount);
+		System.out.println("finalamount : " + consumerData.getBillAmount());
+		return "CardPayment.jsp";
+	}
+	
+	@PostMapping("/DTHRecharge")
+	public String dthRecharge(@RequestParam("operator") String operator, @RequestParam("customerId") int customerId,
+			@RequestParam("amount") double amount, Model model) {
+		model.addAttribute("rechargeType", "dthRecharge");
+		dthRecharge.setOperator(operator);
+		dthRecharge.setCustomerId(customerId);
+		dthRecharge.setAmount(amount);
+		double taxAmount = amount + (amount/100)*5;
+		model.addAttribute("taxAmount", taxAmount);
+		model.addAttribute("dthDetails", dthRecharge);
 		return "CardPayment.jsp";
 	}
 	
