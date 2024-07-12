@@ -80,18 +80,24 @@ public class WalletImpl implements WalletDAO {
 		}
 		return Integer.parseInt(strBuilder.toString());
 	}
+	
+	public double amountGenerator() {
+		StringBuilder strBuilder = new StringBuilder();
+		for(int i=1; i<=4; i+=1) {
+			strBuilder.append(random.nextInt(10));
+		}
+		return Integer.parseInt(strBuilder.toString());
+	}
 
 	public void setUserDetails(Users user) {
 		String query = "insert into users values (?,?,?,?,?)";
 		Object[] params = { 0, user.getFirstName(), user.getLastName(), user.getPassword(), user.getEmail() };
 		jdbcTemplate.update(query, params);
-		System.out.println("Inserted Successfully!!!");
 	}
 
 	public boolean retrieveUserCred(Users user) throws EmptyResultDataAccessException {
 		String query = "SELECT email FROM users WHERE email = ?";
 		try {
-			System.out.println("in retrieve user cred");
 			return jdbcTemplate.queryForObject(query, new GetMail(), user.getEmail()) != null;
 		} catch (IncorrectResultSizeDataAccessException e) {
 			return false;
@@ -102,7 +108,6 @@ public class WalletImpl implements WalletDAO {
 		String query = "SELECT email, password FROM users WHERE email = ? AND password = ?";
 		Object[] params = { email, password };
 		try {
-			System.out.println("in retrieve user cred");
 			return jdbcTemplate.queryForObject(query, new CheckLogin(), params) != null;
 			} catch (IncorrectResultSizeDataAccessException e) {
 			return false;

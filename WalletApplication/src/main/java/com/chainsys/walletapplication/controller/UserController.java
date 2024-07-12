@@ -17,9 +17,11 @@ import com.chainsys.walletapplication.model.BankAccounts;
 import com.chainsys.walletapplication.model.Cards;
 import com.chainsys.walletapplication.model.DTHRecharge;
 import com.chainsys.walletapplication.model.EBConsumerData;
+import com.chainsys.walletapplication.model.GasRecharge;
 import com.chainsys.walletapplication.model.MobileRecharge;
 import com.chainsys.walletapplication.model.Users;
 import com.chainsys.walletapplication.model.Wallets;
+import com.chainsys.walletapplication.model.WaterRecharge;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -49,6 +51,12 @@ public class UserController {
 	
 	@Autowired
 	DTHRecharge dthRecharge;
+	
+	@Autowired
+	GasRecharge gasRecharge;
+	
+	@Autowired
+	WaterRecharge waterRecharge;
 	
 	@RequestMapping("/")
 	public String home() {
@@ -291,6 +299,34 @@ public class UserController {
 		model.addAttribute("taxAmount", taxAmount);
 		model.addAttribute("dthDetails", dthRecharge);
 		return "CardPayment.jsp";
+	}
+	
+	
+	@PostMapping("/WaterRecharge")
+	public String waterRecharge(@RequestParam("serviceProvider") String serviceProvider, @RequestParam("billNumber") String billNumber,
+			@RequestParam("mobileNumber") String mobileNumber, @RequestParam("amount") double amount,Model model) {
+		model.addAttribute("rechargeType","waterRecharge");
+		waterRecharge.setServiceProvider(serviceProvider);
+		waterRecharge.setBillNumber(billNumber);
+		waterRecharge.setMobileNumber(mobileNumber);
+		waterRecharge.setAmount(amount);
+		double taxAmount = amount + (amount/100)*5;
+		model.addAttribute("taxAmount", taxAmount);
+		model.addAttribute("waterRechargeDetails",waterRecharge);
+		return "CardPayment.jsp";
+	}
+	
+	@PostMapping("/GasRecharge")
+	public String gasRecharge(@RequestParam("gasProvider") String gasProvider, @RequestParam("mobileNumber") String mobileNumber,
+			@RequestParam("amount") double amount, Model model) {
+		model.addAttribute("rechargeType","gasRecharge");
+		gasRecharge.setGasProvider(gasProvider);
+		gasRecharge.setMobileNumber(mobileNumber);
+		gasRecharge.setAmount(amount);
+		double taxAmount = amount + (amount/100)*5;
+		model.addAttribute("taxAmount", taxAmount);
+		model.addAttribute("gasRechargeDetails",gasRecharge);
+		return "CardPayment.jsp";	
 	}
 	
 	@PostMapping("/Logout")

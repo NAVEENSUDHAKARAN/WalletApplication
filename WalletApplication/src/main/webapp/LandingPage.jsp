@@ -457,7 +457,27 @@ opacity: 100%;
 <div class="modal fade" id="dthModal" tabindex="-1" role="dialog" aria-labelledby="electricityModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content"  style="padding: 0; border-radius: 0; width:max-content; border-radius: 5px;">
-            <div class="modal-body" style="padding: 0; background-color: #fff;  border-radius: 5px;" >
+            <div class="modal-body" style="padding: 0; background:#fff; border-radius: 5px;" >
+                
+            </div>
+       </div>
+    </div>
+</div>
+
+<div class="modal fade" id="waterModal" tabindex="-1" role="dialog" aria-labelledby="electricityModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="padding: 0; border-radius: 0; width:max-content; border-radius: 5px;" >
+            <div class="modal-body" style="padding: 0; background:#fff; border-radius: 5px;">
+                
+            </div>
+       </div>
+    </div>
+</div>
+
+<div class="modal fade" id="gasModal" tabindex="-1" role="dialog" aria-labelledby="electricityModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="padding: 0;  border-radius: 0; width:max-content; border-radius: 5px; " >
+            <div class="modal-body" style="padding: 0; background:#fff; border-radius: 5px;">
                 
             </div>
        </div>
@@ -623,7 +643,7 @@ opacity: 100%;
             <h2>Bills &amp; Recharge</h2>
             <img src="https://akam.cdn.jdmagicbox.com/images/icontent/newwap/web2022/bharat_billpay.svg" alt="Bills &amp; Recharge Icon">
         </div>
-        <p>Pay your bills &amp; recharge instantly with Justdial</p>
+        <p>Pay your bills &amp; recharge instantly with Digipay</p>
         <a href="">Explore More</a>
     </div>
 
@@ -651,14 +671,14 @@ opacity: 100%;
         </div>
         
         <div class="bill-type">
-            <a href="/online-bill-payment/water">
+            <a onclick="openWaterModal()" data-toggle="modal" data-target="#waterModal">
                 <img src="https://akam.cdn.jdmagicbox.com/images/icontent/newwap/web2022/bt_water.svg?w=128&amp;q=75" alt="Water">
                 <p>Water</p>
             </a>
         </div>
         
         <div class="bill-type">
-            <a href="/online-bill-payment/gas">
+            <a  onclick="openGasModal()" data-toggle="modal" data-target="#gasModal">
                 <img src="https://akam.cdn.jdmagicbox.com/images/icontent/newwap/web2022/bt_gas.svg?w=128&amp;q=75" alt="Gas">
                 <p>Gas</p>
             </a>
@@ -721,25 +741,49 @@ opacity: 100%;
 <script>
 
 function openElectricityModal() {	
-	  // Use jQuery to load content dynamically into modal body
+	  
 	  $('#electricityModal .modal-body').load('ElectricityCustomerData.jsp', function(response, status, xhr) {
 	    if (status == "error") {
 	      console.error("Error loading content:", xhr.status, xhr.statusText);
-	      // Optionally handle error, show message, or fallback
+	      
 	    } else {
-	      $('#electricityModal').modal('show'); // Show the modal after content is loaded
+	      $('#electricityModal').modal('show');
 	    }
 	  });
 }
 
 function openDTHModal() {	
-	  // Use jQuery to load content dynamically into modal body
+
 	  $('#dthModal .modal-body').load('DTHRecharge.jsp', function(response, status, xhr) {
 	    if (status == "error") {
 	      console.error("Error loading content:", xhr.status, xhr.statusText);
-	      // Optionally handle error, show message, or fallback
+	     
 	    } else {
-	      $('#dthModal').modal('show'); // Show the modal after content is loaded
+	      $('#dthModal').modal('show');
+	    }
+	  });
+}
+
+function openGasModal() {	
+	  
+	  $('#gasModal .modal-body').load('GasRecharge.jsp', function(response, status, xhr) {
+	    if (status == "error") {
+	      console.error("Error loading content:", xhr.status, xhr.statusText);
+	      
+	    } else {
+	      $('#gasModal').modal('show'); 
+	    }
+	  });
+}
+
+function openWaterModal() {	
+	  
+	  $('#waterModal .modal-body').load('WaterBillPayment.jsp', function(response, status, xhr) {
+	    if (status == "error") {
+	      console.error("Error loading content:", xhr.status, xhr.statusText);
+	      
+	    } else {
+	      $('#waterModal').modal('show'); 
 	    }
 	  });
 }
