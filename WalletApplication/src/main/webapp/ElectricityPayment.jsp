@@ -228,7 +228,6 @@ function calcBill(f) {
   var slab = getSlab(startDate, endDate);
   var bill = 0;
 
-  // Fixed charges with 8% surcharge
   if (f.sancLoad.value === "2 kW") {
     bill += 40 * slab * 1.08;
   }
@@ -237,9 +236,9 @@ function calcBill(f) {
   }
 
   bill += unitsPrice(units, slab);
-  bill = bill * 1.06; // PPAC charges 6%
-  bill = bill * 1.08; // 8% Surcharge
-  bill = bill * 1.05; // Electricity Tax
+  bill = bill * 1.06;
+  bill = bill * 1.08;
+  bill = bill * 1.05;
 
   bill = bill.toFixed(2);
 

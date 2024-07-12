@@ -1,5 +1,8 @@
+<%@page import="org.springframework.web.context.support.WebApplicationContextUtils"%>
+<%@page import="org.springframework.context.ApplicationContext"%>
+<%@ page import="com.chainsys.walletapplication.dao.WalletImpl" %>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>DTH Recharge</title>
     <style>
@@ -45,9 +48,12 @@
 </head>
 <body>
     <div class="container">
-    	 <a href="LandingPage.jsp" ><img alt="not working" src="images/DigiPayNoBG.png" width="40px" height="40px" ></a> 
-    
-        <h2>Payment Details</h2>
+    	 <a href="LandingPage.jsp" ><img alt="not working" style="padding-left: -30px;" src="images/backArrow.png" width="30px" height="30px" ></a> 
+    <%
+    ApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+ 	WalletImpl walletImpl = (WalletImpl) context.getBean("walletImpl");
+    %>
+        <h2 style="text-align: center;">Payment Details</h2>
         <form action="DTHRecharge" method="post">
             <div class="form-group">
                 <label for="operator">Select Operator:</label>
@@ -70,5 +76,12 @@
             <button type="submit" class="submit-btn">Submit</button>
         </form>
     </div>
+<script>
+	var customerId = document.getElementById('customerId');
+	var amount = document.getElementById('amount');
+	customerId.addEventListener('click', function(event)){
+	document.getElementById('amount').innerHtml = <%= walletImpl.amountGenerator() %>;
+	}
+</script>    
 </body>
 </html>

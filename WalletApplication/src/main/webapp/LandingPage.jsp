@@ -476,6 +476,16 @@ opacity: 100%;
 
 <div class="modal fade" id="gasModal" tabindex="-1" role="dialog" aria-labelledby="electricityModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
+        <div class="modal-content"  >
+            <div class="modal-body" >
+                
+            </div>
+       </div>
+    </div>
+</div>
+
+<div class="modal fade" id="insuranceModal" tabindex="-1" role="dialog" aria-labelledby="electricityModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
         <div class="modal-content" style="padding: 0;  border-radius: 0; width:max-content; border-radius: 5px; " >
             <div class="modal-body" style="padding: 0; background:#fff; border-radius: 5px;">
                 
@@ -516,7 +526,6 @@ opacity: 100%;
 			     	WalletImpl walletImpl = (WalletImpl) context.getBean("walletImpl");
 					System.out.println("from landing jsp : " + userId);
 					System.out.println("from landing jsp : " + manager.getWalletBalance(userId));
-					
 				%>
 						<div id="walletBalanceDiv">
 							<span style="font-size: medium;small;">WalletBalance</span><br>
@@ -685,7 +694,7 @@ opacity: 100%;
         </div>
         
         <div class="bill-type">
-            <a href="/online-bill-payment/insurance-premium">
+            <a onclick="openInsuranceModal()" data-toggle="modal" data-target="#insuranceModal">
                 <img src="https://akam.cdn.jdmagicbox.com/images/icontent/newwap/web2022/bt_insurance.svg?w=128&amp;q=75" alt="Insurance">
                 <p>Insurance</p>
             </a>
@@ -784,6 +793,18 @@ function openWaterModal() {
 	      
 	    } else {
 	      $('#waterModal').modal('show'); 
+	    }
+	  });
+}
+
+function openInsuranceModal() {	
+	  
+	  $('#insuranceModal .modal-body').load('InsurancePayment.jsp', function(response, status, xhr) {
+	    if (status == "error") {
+	      console.error("Error loading content:", xhr.status, xhr.statusText);
+	      
+	    } else {
+	      $('#insuranceModal').modal('show'); 
 	    }
 	  });
 }

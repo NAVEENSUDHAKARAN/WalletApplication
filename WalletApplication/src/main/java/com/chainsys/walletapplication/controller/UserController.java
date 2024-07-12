@@ -2,6 +2,7 @@ package com.chainsys.walletapplication.controller;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.LocalDate;
 import java.time.YearMonth;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import com.chainsys.walletapplication.model.Cards;
 import com.chainsys.walletapplication.model.DTHRecharge;
 import com.chainsys.walletapplication.model.EBConsumerData;
 import com.chainsys.walletapplication.model.GasRecharge;
+import com.chainsys.walletapplication.model.InsuranceRecharge;
 import com.chainsys.walletapplication.model.MobileRecharge;
 import com.chainsys.walletapplication.model.Users;
 import com.chainsys.walletapplication.model.Wallets;
@@ -26,7 +28,6 @@ import com.chainsys.walletapplication.model.WaterRecharge;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import jakarta.websocket.Session;
 
 @Controller
 public class UserController {
@@ -57,6 +58,9 @@ public class UserController {
 	
 	@Autowired
 	WaterRecharge waterRecharge;
+	
+	@Autowired
+	InsuranceRecharge insuranceRecharge;
 	
 	@RequestMapping("/")
 	public String home() {
@@ -168,13 +172,12 @@ public class UserController {
 	@PostMapping("/AccountTransfer")
 	public String accountTransfer(@RequestParam("recipientAccountNumber") String senderAccNo, @RequestParam("amountToSend") double amountToSend,
 			@RequestParam("receiverWalletID") String receiverWalletId, Model model){
-		int userId = walletImpl.getUserID(users);
+			int userId = walletImpl.getUserID(users);
 		
 		if(walletImpl.checkWalletId(receiverWalletId) && walletImpl.checkAccountNumber(userId, senderAccNo)) {
 			walletImpl.deductBankBalance(userId, amountToSend);
 			amountToSend += walletImpl.getWalletBalance(receiverWalletId);
 			walletImpl.updateWalletBalance(amountToSend, receiverWalletId);
-			model.addAttribute("invalidWalletIdMsg", "qwerty");
 			return "LandingPage.jsp";
 		}
 		else if(senderAccNo == null) {
@@ -198,7 +201,6 @@ public class UserController {
 			amountToSend += walletImpl.getWalletBalance(receiverId);
 			walletImpl.updateWalletBalance(amountToSend, receiverId);
 			walletImpl.updateTransactionHistory(senderId, receiverId, amountToSend);
-			model.addAttribute("alertMessage", "okay");
 			return "LandingPage.jsp";
 		}
 		else if(!walletImpl.checkPassword(userId, password)){
@@ -246,21 +248,24 @@ public class UserController {
 		}
 		else {
 					System.out.println("unsuccessful");
+					model.addAttribute("errorMessage", "Invalid Credentials");
+					return "CardPayment.jsp";
 	}
-		return "CardPayment.jsp";
+		
 	}
 	
 	@PostMapping("/MobileRecharge")
 	public String mobileRecharge(@RequestParam("type") String rechargeType, @RequestParam("network") String network,@RequestParam("mobileNumber") String mobileNumber,@RequestParam("rechargePlan") double plan,
-			Model model) {
+			Model model, HttpSession session) {
 		
 		mobile.setRechargeType(rechargeType);
 		mobile.setNetwork(network);
 		mobile.setPlan(plan);
 		mobile.setMobileNumber(mobileNumber);
-		
-		model.addAttribute("rechargeType", "mobileRecharge");
-		model.addAttribute("rechargeDetails",mobile);
+		double taxAmount = plan + (plan/100)*5;
+		session.setAttribute("taxAmount", taxAmount);
+		session.setAttribute("rechargeType", "mobileRecharge");
+		session.setAttribute("rechargeDetails",mobile);
 		
 		return "CardPayment.jsp";
 	}
@@ -277,56 +282,73 @@ public class UserController {
 	}
 	
 	@PostMapping("/ElectricityRecharge")
-	public String electricityRecharge(@RequestParam("billAmount") String amount, Model model) {
-		model.addAttribute("rechargeType", "electricityRecharge");
+	public String electricityRecharge(@RequestParam("billAmount") String amount, Model model,HttpSession session) {
+		session.setAttribute("rechargeType", "electricityRecharge");
 		System.err.println("Amount -----> " + amount);
 		double billAmount = Double.parseDouble(amount);
 		consumerData.setBillAmount(billAmount);
 		double taxAmount = billAmount + (billAmount/100)*5;
-		model.addAttribute("taxAmount", taxAmount);
+		session.setAttribute("taxAmount", taxAmount);
 		System.out.println("finalamount : " + consumerData.getBillAmount());
 		return "CardPayment.jsp";
 	}
 	
 	@PostMapping("/DTHRecharge")
 	public String dthRecharge(@RequestParam("operator") String operator, @RequestParam("customerId") int customerId,
-			@RequestParam("amount") double amount, Model model) {
-		model.addAttribute("rechargeType", "dthRecharge");
+			@RequestParam("amount") double amount, Model model,HttpSession session) {
+		session.setAttribute("rechargeType", "dthRecharge");
 		dthRecharge.setOperator(operator);
 		dthRecharge.setCustomerId(customerId);
 		dthRecharge.setAmount(amount);
 		double taxAmount = amount + (amount/100)*5;
-		model.addAttribute("taxAmount", taxAmount);
-		model.addAttribute("dthDetails", dthRecharge);
+		session.setAttribute("taxAmount", taxAmount);
+		session.setAttribute("dthDetails", dthRecharge);
 		return "CardPayment.jsp";
 	}
 	
 	
 	@PostMapping("/WaterRecharge")
 	public String waterRecharge(@RequestParam("serviceProvider") String serviceProvider, @RequestParam("billNumber") String billNumber,
-			@RequestParam("mobileNumber") String mobileNumber, @RequestParam("amount") double amount,Model model) {
-		model.addAttribute("rechargeType","waterRecharge");
+			@RequestParam("mobileNumber") String mobileNumber, @RequestParam("amount") double amount,Model model, HttpSession session) {
+		session.setAttribute("rechargeType","waterRecharge");
 		waterRecharge.setServiceProvider(serviceProvider);
 		waterRecharge.setBillNumber(billNumber);
 		waterRecharge.setMobileNumber(mobileNumber);
 		waterRecharge.setAmount(amount);
 		double taxAmount = amount + (amount/100)*5;
-		model.addAttribute("taxAmount", taxAmount);
-		model.addAttribute("waterRechargeDetails",waterRecharge);
+		session.setAttribute("taxAmount", taxAmount);
+		session.setAttribute("waterRechargeDetails",waterRecharge);
 		return "CardPayment.jsp";
 	}
 	
 	@PostMapping("/GasRecharge")
 	public String gasRecharge(@RequestParam("gasProvider") String gasProvider, @RequestParam("mobileNumber") String mobileNumber,
-			@RequestParam("amount") double amount, Model model) {
-		model.addAttribute("rechargeType","gasRecharge");
+			@RequestParam("amount") double amount, Model model,HttpSession session) {
+		session.setAttribute("rechargeType","gasRecharge");
 		gasRecharge.setGasProvider(gasProvider);
 		gasRecharge.setMobileNumber(mobileNumber);
 		gasRecharge.setAmount(amount);
 		double taxAmount = amount + (amount/100)*5;
-		model.addAttribute("taxAmount", taxAmount);
-		model.addAttribute("gasRechargeDetails",gasRecharge);
+		session.setAttribute("taxAmount", taxAmount);
+		session.setAttribute("gasRechargeDetails",gasRecharge);
 		return "CardPayment.jsp";	
+	}
+	
+	@PostMapping("/InsurancePayment")
+	public String insurancePayment(@RequestParam("insuranceCompany") String insuranceCompany,@RequestParam("policyNumber") String policyNumber,@RequestParam("dob") String dob,@RequestParam("amount") double amount ,
+			@RequestParam("validDate") String localValidDate, HttpSession session) {
+		System.err.println("in InsurancePayment");
+		session.setAttribute("rechargeType","insuranceRecharge");
+		insuranceRecharge.setInsuranceCompany(insuranceCompany);
+		insuranceRecharge.setPolicyNumber(policyNumber);
+		insuranceRecharge.setDob(dob);
+		insuranceRecharge.setAmount(amount);
+		String validDate = localValidDate.toString();
+		insuranceRecharge.setValidDate(validDate);
+		double taxAmount = amount + (amount/100)*5;
+		session.setAttribute("taxAmount", taxAmount);
+		session.setAttribute("insuranceRechargeDetails",insuranceRecharge);
+		return "CardPayment.jsp";
 	}
 	
 	@PostMapping("/Logout")

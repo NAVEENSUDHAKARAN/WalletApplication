@@ -115,7 +115,7 @@ textarea {
 													<div data-mdb-input-init class="form-outline">
 														<label class="form-label" for="form3Examplev5">Phone
 															Number</label> <input type="text" id="form3Examplev5"
-															name="phoneNumber" pattern="^[6-8]\d{9}$"
+															name="phoneNumber" pattern="^[6-9]\d{9}$"
 															title="Should have 10 Numbers"
 															class="form-control form-control-lg" required /> <span
 															class="error-message" style="font-size: 10px"></span>
@@ -237,7 +237,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 return /^[6-9]\d{9}$/.test(value); 
             case 'form3Examplev4':
             	return /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$/.test(value);
-            // Add more cases for other input fields as needed
             default:
                 return true; 
         }
@@ -253,12 +252,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 errorElement.innerText = 'Name should have only characters.';
                 break;
             case 'form3Examplev5':
-                errorElement.innerText = 'Should have 10 Numbers starting from 6 to 8.';
+                errorElement.innerText = 'Should have 10 Numbers starting from 6 to 9.';
                 break;
             case 'form3Examplev4':
             	errorElement.innerText = 'Password must be at least 8 characters long and includes atleast one uppercase letter and one digit';
             	break;
-            	// Add more cases for other input fields as needed
             default:
                 errorElement.innerText = '';
                 break;

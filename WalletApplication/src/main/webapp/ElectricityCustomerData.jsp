@@ -40,7 +40,7 @@
     margin-bottom: 5px;
   }
 
-  .inp {
+  #consumerNumber,#consumerName,#serviceNumber,#contactNumber{
     width: 95%;
     padding: 10px;
     font-size: 16px;
