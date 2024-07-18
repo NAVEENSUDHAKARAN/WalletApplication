@@ -5,8 +5,6 @@ import java.sql.SQLException;
 
 import org.springframework.jdbc.core.RowMapper;
 
-import com.chainsys.walletapplication.model.Users;
-
 public class GetUserId implements RowMapper<Integer> {
 
 	@Override

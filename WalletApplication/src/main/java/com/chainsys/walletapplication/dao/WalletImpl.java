@@ -116,7 +116,6 @@ public class WalletImpl implements WalletDAO {
 
 	public int getUserID(Users user) {
 		String query = "Select user_id from users where email = ?";
-		System.err.println("in the get userid --->" + user.getEmail());
 		try {
 			return jdbcTemplate.queryForObject(query, new GetUserId(), user.getEmail());
 		} catch (NullPointerException | IncorrectResultSizeDataAccessException e) {
@@ -131,7 +130,6 @@ public class WalletImpl implements WalletDAO {
 	
 	public boolean getUserIdFromCards(int userId) {
 		String query = "select user_id from cards where user_id = ?";
-		System.err.println("in getUserIdFromCards" + userId);
 		try {
 			return jdbcTemplate.queryForObject(query, new CardUserID(), userId) != 0;
 		}catch(Exception e) {
@@ -165,7 +163,6 @@ public class WalletImpl implements WalletDAO {
 	public double getWalletBalance(int id) {
 		String query = "SELECT balance FROM wallets WHERE user_id = ?";
 		try {
-			System.out.println("From Get wallet Balance : " + id);
 			return jdbcTemplate.queryForObject(query, new GetWalletBalance(), id);
 		} catch (NullPointerException | IncorrectResultSizeDataAccessException e) {
 			return 0;
@@ -173,10 +170,8 @@ public class WalletImpl implements WalletDAO {
 	}
 	
 	public List<Users> readUserDetails(int id) {
-		System.out.println("read details --->" + id);
 		String query = "SELECT user_id, first_name, last_name, password, email FROM users WHERE user_id = ?";
 		return jdbcTemplate.query(query, new UserDetails(), id);
-	
 	}
 	
 	public List<BankAccounts> readAccountDetails(int id) {
@@ -199,10 +194,8 @@ public class WalletImpl implements WalletDAO {
 	}
 	
 	public List<Transactions> readTransactionHistory(String walletId) {
-		String query = "SELECT transaction_id, sender_wallet_id, receiver_wallet_id, DataAndTime, amount "
-				+ "FROM transactions WHERE sender_wallet_id = ? ORDER BY DataAndTime DESC";
+		String query = "SELECT transaction_id, sender_wallet_id, receiver_wallet_id, DataAndTime, amount FROM transactions WHERE sender_wallet_id = ? ORDER BY DataAndTime DESC";
 		return jdbcTemplate.query(query, new TransactionDetails(), walletId);
-		
 	}
 	
 	public List<Cards> readCardDetails(int userId) {
@@ -213,8 +206,6 @@ public class WalletImpl implements WalletDAO {
 	public boolean checkAccountNumber(int id, String accNo) {
 		String query = "SELECT account_number FROM bank_accounts WHERE user_id = ?";
 		String dbAcc = jdbcTemplate.queryForObject(query, new AccountNumber(), id).toString();
-		System.out.println("dbAcc --> " + dbAcc);
-		System.out.println("Acc --> " + accNo);
 		return accNo.equals(dbAcc);
 	}
 	
@@ -312,6 +303,25 @@ public class WalletImpl implements WalletDAO {
 		jdbcTemplate.update(query,updatedAmount, walletId);
 	}
 	
+	public int getCredits(String senderId) {
+		String query = "select credits from wallets where wallet_id = ?";
+		return jdbcTemplate.queryForObject(query, Integer.class, senderId);
+	}
+	
+	public void updateCredits(String senderId) {
+		String query = "update wallets set credits = ? where wallet_id = ?";
+		int updatedCredits = getCredits(senderId) + 1;
+		Object[] params = {updatedCredits, senderId};
+		jdbcTemplate.update(query, params);
+	}
+	
+	public void deductCredits(String senderId) {
+		String query = "update wallets set credits = ? where wallet_id = ?";
+		int deductedCredits=0; /* = getCredits(senderId); */
+		Object[] params = {deductedCredits, senderId};
+		jdbcTemplate.update(query, params);
+	}
+	
 	public void updateTransactionHistory(String senderId, String receiverId, double amount) {
 		String query = "INSERT INTO transactions (transaction_id, sender_wallet_id, receiver_wallet_id, DataAndTime, amount) VALUES (?,?,?,?,?)";
 		Object[] params = {transactionIdGenerator(), senderId, receiverId, LocalDateTime.now(), amount};
@@ -333,9 +343,7 @@ public class WalletImpl implements WalletDAO {
 	@Override
 	public boolean checkCard(String cardNumber, String expiryYear, int cvv) {
 		String query = "select cardnumber, expiry_date, cvv from cards where cardnumber =? and expiry_date = ? and cvv =?";
-		System.err.println("---> " + cardNumber);
 		Object[] params = {cardNumber, expiryYear, cvv};
-		System.out.println("in check cards");
 		try {
 			return jdbcTemplate.queryForObject(query, new CheckCardDetails(), params) != null;
 		}catch(Exception e) {

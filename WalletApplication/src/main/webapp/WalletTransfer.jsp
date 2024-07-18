@@ -66,6 +66,18 @@
             color: #333;
         }
         
+        #creditsDiv{
+        	display: flex;
+        	justify-content: space-between;
+        }
+        
+        #points{
+        	font-size: 30px;
+        	color: #3c455c;
+        }
+        
+}
+        
  /*     ::-webkit-scrollbar {
 		  width: 10px;
 		}
@@ -115,8 +127,11 @@
         <div class="card mb-4 mb-lg-0">
           <div class="card-body p-0">
             	<div class="card-body">
-                <h4 class="mb-4">POINTS</h4>
-                 	<p>0</p>
+                <h4 class="mb-4">CREDITS</h4>
+                 	<div id="creditsDiv">
+                 		<img alt="coin" src="images/GoldCoin.png" width="40px" height="40px">
+                 		<p id="points"><%= walletImpl.getCredits(walletImpl.getWalletId(id)) %></p>
+                 	</div>
               </div>
           </div>
         </div>

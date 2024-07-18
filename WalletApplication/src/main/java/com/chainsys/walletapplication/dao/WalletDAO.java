@@ -1,10 +1,6 @@
 package com.chainsys.walletapplication.dao;
 
-import java.util.List;
-
 import org.springframework.stereotype.Repository;
-
-import com.chainsys.walletapplication.model.Cards;
 
 @Repository
 public interface WalletDAO {

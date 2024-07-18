@@ -13,11 +13,8 @@ public class CheckCardDetails implements RowMapper<Cards>{
 	public Cards mapRow(ResultSet rs, int rowNum) throws SQLException {
 		Cards cards = new Cards();
 		cards.setCardNumber(rs.getLong("cardnumber"));
-		System.out.println("from mapper ---> " + cards.getCardNumber());
 		cards.setExpiryDate(rs.getString("expiry_date"));
-		System.out.println(cards.getExpiryDate());
 		cards.setCvv(rs.getInt("cvv"));
-		System.out.println(cards.getCvv());
 		return cards;
 	}
 

@@ -155,8 +155,8 @@ textarea {
 											<div data-mdb-input-init class="form-outline form-white">
 												<label class="form-label" for="form3Examplea2">Date
 													Of Birth</label> <input type="date" id="form3Examplea2"
-													name="dateOfBirth" class="form-control form-control-lg"
-													max="15-06-2006" required />
+													name="dateOfBirth" class="form-control form-control-lg" max="01-07-2024"
+													 required />
 
 											</div>
 										</div>
@@ -211,6 +211,28 @@ textarea {
 	</section>
 </body>
 <script>
+const datePicker = document.getElementById("form3Examplea2");
+/* 
+datePicker.min = getDate(); */
+datePicker.max = getDate(18 * -365);
+
+function getDate(days) {
+    let date;
+
+    if (days !== undefined) {
+        date = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+    } else {
+        date = new Date();
+    }
+
+    const offset = date.getTimezoneOffset();
+
+    date = new Date(date.getTime() - (offset*60*1000));
+
+    return date.toISOString().split("T")[0];
+}
+</script>
+<script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('form');
 
@@ -237,6 +259,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 return /^[6-9]\d{9}$/.test(value); 
             case 'form3Examplev4':
             	return /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,}$/.test(value);
+            case 'form3Examplea3':
+            	return /^[\\d]{12}$/.test(value);
             default:
                 return true; 
         }
@@ -257,12 +281,16 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'form3Examplev4':
             	errorElement.innerText = 'Password must be at least 8 characters long and includes atleast one uppercase letter and one digit';
             	break;
+            case 'form3Examplea3':
+            	errorElement.innerText = 'Adhaar Number Must have 16 Numbers.';
+            	break;
             default:
                 errorElement.innerText = '';
                 break;
         }
 
         errorElement.style.color = 'red';
+
     }
 
     function clearError(input) {

@@ -2,7 +2,6 @@ package com.chainsys.walletapplication.controller;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.time.LocalDate;
 import java.time.YearMonth;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.chainsys.walletapplication.dao.DynamicQR;
 import com.chainsys.walletapplication.dao.WalletImpl;
+import com.chainsys.walletapplication.exception.CheckBankBalance;
+import com.chainsys.walletapplication.exception.ExistingAccountException;
+import com.chainsys.walletapplication.exception.LoginCheckException;
 import com.chainsys.walletapplication.model.BankAccounts;
 import com.chainsys.walletapplication.model.Cards;
 import com.chainsys.walletapplication.model.DTHRecharge;
@@ -62,9 +64,13 @@ public class UserController {
 	@Autowired
 	InsuranceRecharge insuranceRecharge;
 	
+	static String landingPageJsp = "LandingPage.jsp";
+	static String depositAmountJsp = "DepositAmount.jsp";
+	static String cardPaymentJsp = "CardPayment.jsp";
+	
 	@RequestMapping("/")
 	public String home() {
-		return "LandingPage.jsp";
+		return landingPageJsp;
 	}
 
 	@PostMapping("/Register")
@@ -72,7 +78,7 @@ public class UserController {
 			@RequestParam("email") String email, @RequestParam("phoneNumber") String phoneNumber,
 			@RequestParam("password") String password, @RequestParam("dateOfBirth") String dateOfBirth,
 			@RequestParam("aadhaarNumber") long aadhaarNumber, @RequestParam("panNumber") String panNumber,
-			@RequestParam("residentialAddress") String residentialAddress, Model model) {
+			@RequestParam("residentialAddress") String residentialAddress, Model model) throws ExistingAccountException {
 		BankAccounts account = new BankAccounts();
 		users.setFirstName(fName);
 		users.setLastName(lName);
@@ -89,14 +95,17 @@ public class UserController {
 			walletImpl.createAccount(account, walletImpl.getUserID(users));
 			return "/CreateWalletId";
 		} else {
-			model.addAttribute("message", "Account Already Exist");
-			return "Register.jsp";
+			/*
+			 * model.addAttribute("message", "Account Already Exist"); return
+			 * "Register.jsp";
+			 */
+			throw new ExistingAccountException("Account Already Exist!!");
 		}
 	}
 
 	@PostMapping("/Login")
 	public String login(@RequestParam("email") String mail, @RequestParam("loginPassword") String password,
-			HttpSession session, Model model) {
+			HttpSession session, Model model) throws LoginCheckException {
 		users.setEmail(mail);
 		users.setPassword(password);
 
@@ -109,8 +118,8 @@ public class UserController {
 			session.setAttribute("cardDetails", walletImpl.readCardDetails(userId));
 			return "redirect:/LandingPage.jsp";
 		} else {
-			model.addAttribute("error", "Invalid Email or Password");
-			return "LoginPage.jsp";
+			throw new LoginCheckException("invalid password");
+
 		}
 
 	}
@@ -133,9 +142,9 @@ public class UserController {
 			wallets.setWalletId(walletId);
 			
 			walletImpl.createWalletId(wallets);
-			return "LandingPage.jsp";
+			return landingPageJsp;
 		}
-		return "LandingPage.jsp";
+		return landingPageJsp;
 
 	}
 	
@@ -154,34 +163,38 @@ public class UserController {
 		{
 			
 			model.addAttribute("message", "Invalid Password");
-			return "DepositAmount.jsp";		
+			return depositAmountJsp;		
 		}
 		else if(!walletImpl.checkAccountNumber(userId,accountNumber))
 		{
 			model.addAttribute("message", "Invalid AccountNumber");
-			return "DepositAmount.jsp";		
+			return depositAmountJsp;		
 		}
 		else if(!walletImpl.checkPassword(userId, password) && !walletImpl.checkAccountNumber(userId,accountNumber))
 		{
 			model.addAttribute("message", "Invalid AccountNumber and Password");
-			return "DepositAmount.jsp";		
+			return depositAmountJsp;		
 		}
 		return "";
 	}
 	
 	@PostMapping("/AccountTransfer")
 	public String accountTransfer(@RequestParam("recipientAccountNumber") String senderAccNo, @RequestParam("amountToSend") double amountToSend,
-			@RequestParam("receiverWalletID") String receiverWalletId, Model model){
+			@RequestParam("receiverWalletID") String receiverWalletId,@RequestParam("password") String password, Model model){
 			int userId = walletImpl.getUserID(users);
 		
-		if(walletImpl.checkWalletId(receiverWalletId) && walletImpl.checkAccountNumber(userId, senderAccNo)) {
+		if(walletImpl.checkWalletId(receiverWalletId) && walletImpl.checkAccountNumber(userId, senderAccNo) && walletImpl.checkPassword(userId, password)) {
 			walletImpl.deductBankBalance(userId, amountToSend);
 			amountToSend += walletImpl.getWalletBalance(receiverWalletId);
 			walletImpl.updateWalletBalance(amountToSend, receiverWalletId);
-			return "LandingPage.jsp";
+			return landingPageJsp;
 		}
 		else if(senderAccNo == null) {
 			model.addAttribute("invalidWalletIdMsg", "Create Account");
+			return "AccountTransferPage.jsp";
+		}
+		else if(!walletImpl.checkPassword(userId, password)) {
+			model.addAttribute("invalidWalletIdMsg", "Invalid Password");
 			return "AccountTransferPage.jsp";
 		}
 		else
@@ -193,15 +206,19 @@ public class UserController {
 	
 	@PostMapping("/WalletTransfer")
 	public String walletTransfer(@RequestParam("userId") int userId, @RequestParam("amountToSend") double amountToSend, @RequestParam("senderWalletId") String senderId,
-				@RequestParam("receiverWalletId") String receiverId, @RequestParam("password") String password, Model model) {
-		System.err.println("-----");
+				@RequestParam("receiverWalletId") String receiverId, @RequestParam("password") String password, Model model) throws CheckBankBalance {
 		
-		if(walletImpl.checkWalletId(receiverId) && walletImpl.checkWalletId(senderId) && walletImpl.checkPassword(userId, password)) {
+		if(walletImpl.checkWalletId(receiverId) && walletImpl.checkWalletId(senderId) && walletImpl.checkPassword(userId, password) && (walletImpl.getWalletBalance(senderId)-amountToSend)>0) {
+			double amountToUpdateHistory = amountToSend;
+			if(amountToSend >= 100) {
+				walletImpl.updateCredits(senderId);
+			}
 			walletImpl.deductWalletBalance(senderId, amountToSend);
 			amountToSend += walletImpl.getWalletBalance(receiverId);
 			walletImpl.updateWalletBalance(amountToSend, receiverId);
-			walletImpl.updateTransactionHistory(senderId, receiverId, amountToSend);
-			return "LandingPage.jsp";
+			
+			walletImpl.updateTransactionHistory(senderId, receiverId, amountToUpdateHistory);
+			return landingPageJsp;
 		}
 		else if(!walletImpl.checkPassword(userId, password)){
 			model.addAttribute("alertMessage", "Invalid Password");
@@ -210,6 +227,9 @@ public class UserController {
 		else if(!walletImpl.checkWalletId(receiverId)) {
 			model.addAttribute("alertMessage", "Invalid WalletID");
 			return "WalletTransfer.jsp";		
+		}
+		else if((walletImpl.getWalletBalance(senderId)-amountToSend)<=0){
+			throw new CheckBankBalance("Unavailable Wallet Balance!");
 		}
 		return "";
 	}
@@ -235,21 +255,17 @@ public class UserController {
 	public String cardPayment(@RequestParam("cardNumber") String cardNumber, @RequestParam("expiryMonth") String expiryMonth, @RequestParam("expiryYear") String expiryYear,
 			@RequestParam("cvv") int cvv, Model model, @RequestParam("totalAmount") double totalAmount) {
 		int userId = walletImpl.getUserID(users);
-		String trimmedCardNumber = cardNumber.replaceAll(" ", "");
-		System.err.println("--->" + trimmedCardNumber);
-		System.out.println("(-----)" + totalAmount);
-		System.err.println("<--->" + userId);
-		/* double amount = mobile.getPlan(); */
+		String trimmedCardNumber = cardNumber.replace(" ", "");
+
 		String expiryYearMonth = expiryYear + "-" + expiryMonth;
 
 		if(walletImpl.checkCard(trimmedCardNumber, expiryYearMonth, cvv)) {
 			 walletImpl.deductWalletBalance(walletImpl.getWalletId(userId), totalAmount);
-			 return "LandingPage.jsp";
+			 return landingPageJsp;
 		}
 		else {
-					System.out.println("unsuccessful");
 					model.addAttribute("errorMessage", "Invalid Credentials");
-					return "CardPayment.jsp";
+					return cardPaymentJsp;
 	}
 		
 	}
@@ -267,13 +283,12 @@ public class UserController {
 		session.setAttribute("rechargeType", "mobileRecharge");
 		session.setAttribute("rechargeDetails",mobile);
 		
-		return "CardPayment.jsp";
+		return cardPaymentJsp;
 	}
 	
 	@PostMapping("/ConsumerData")
 	public String consumerData(@RequestParam("consumerName") String name, @RequestParam("consumerNumber") String consumerNumber, @RequestParam("serviceNumber") String serviceNumber,
 			HttpSession session) {
-		System.out.println("---->" + name);
 		consumerData.setName(name);
 		consumerData.setConsumerNumber(consumerNumber);
 		consumerData.setSerialNumber(serviceNumber);
@@ -284,13 +299,11 @@ public class UserController {
 	@PostMapping("/ElectricityRecharge")
 	public String electricityRecharge(@RequestParam("billAmount") String amount, Model model,HttpSession session) {
 		session.setAttribute("rechargeType", "electricityRecharge");
-		System.err.println("Amount -----> " + amount);
 		double billAmount = Double.parseDouble(amount);
 		consumerData.setBillAmount(billAmount);
 		double taxAmount = billAmount + (billAmount/100)*5;
 		session.setAttribute("taxAmount", taxAmount);
-		System.out.println("finalamount : " + consumerData.getBillAmount());
-		return "CardPayment.jsp";
+		return cardPaymentJsp;
 	}
 	
 	@PostMapping("/DTHRecharge")
@@ -303,7 +316,7 @@ public class UserController {
 		double taxAmount = amount + (amount/100)*5;
 		session.setAttribute("taxAmount", taxAmount);
 		session.setAttribute("dthDetails", dthRecharge);
-		return "CardPayment.jsp";
+		return cardPaymentJsp;
 	}
 	
 	
@@ -318,7 +331,7 @@ public class UserController {
 		double taxAmount = amount + (amount/100)*5;
 		session.setAttribute("taxAmount", taxAmount);
 		session.setAttribute("waterRechargeDetails",waterRecharge);
-		return "CardPayment.jsp";
+		return cardPaymentJsp;
 	}
 	
 	@PostMapping("/GasRecharge")
@@ -331,24 +344,24 @@ public class UserController {
 		double taxAmount = amount + (amount/100)*5;
 		session.setAttribute("taxAmount", taxAmount);
 		session.setAttribute("gasRechargeDetails",gasRecharge);
-		return "CardPayment.jsp";	
+		return cardPaymentJsp;	
 	}
 	
 	@PostMapping("/InsurancePayment")
 	public String insurancePayment(@RequestParam("insuranceCompany") String insuranceCompany,@RequestParam("policyNumber") String policyNumber,@RequestParam("dob") String dob,@RequestParam("amount") double amount ,
 			@RequestParam("validDate") String localValidDate, HttpSession session) {
-		System.err.println("in InsurancePayment");
+		System.err.println("In insurance payment");
 		session.setAttribute("rechargeType","insuranceRecharge");
 		insuranceRecharge.setInsuranceCompany(insuranceCompany);
 		insuranceRecharge.setPolicyNumber(policyNumber);
 		insuranceRecharge.setDob(dob);
 		insuranceRecharge.setAmount(amount);
-		String validDate = localValidDate.toString();
+		String validDate = localValidDate;
 		insuranceRecharge.setValidDate(validDate);
 		double taxAmount = amount + (amount/100)*5;
 		session.setAttribute("taxAmount", taxAmount);
 		session.setAttribute("insuranceRechargeDetails",insuranceRecharge);
-		return "CardPayment.jsp";
+		return cardPaymentJsp;
 	}
 	
 	@PostMapping("/Logout")

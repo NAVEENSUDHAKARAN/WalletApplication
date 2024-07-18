@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@page import="org.springframework.web.context.support.WebApplicationContextUtils"%>
-<%@page import="org.springframework.context.ApplicationContext"%>
+<%@ page import="org.springframework.context.ApplicationContext"%>
 <%@ page import="com.chainsys.walletapplication.dao.WalletImpl" %>
 <%@ page import="com.chainsys.walletapplication.model.Users" %>
 <%@ page import="com.chainsys.walletapplication.model.BankAccounts" %>
@@ -17,37 +17,33 @@
     <style>
         .container {
             width: 50%;
-            margin: 0 auto; /* Center the container horizontally */
+            margin: 30px auto;
             padding: 20px;
             border: 1px solid #ccc;
             border-radius: 5px;
             background-color: #f9f9f9;
         }
 
-        label {
-            text-align: left;
-            display: inline-block;
-            width: 150px; 
-            margin-right: 10px; 
-            margin-bottom: 10px;
+        .form-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
-        .accountNumber-container {
-            position: relative;
-            margin-bottom: 20px;
-            text-align: left; 
+        label {
+            width: 45%; 
+            margin: 0;
         }
 
         input[type="text"],
         input[type="number"],
+        input[type="password"],
         button {
-            width: calc(100% - 160px); 
+            width: 45%; 
             padding: 10px;
-            margin-bottom: 20px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            box-sizing: border-box;
-            display: inline-block;
         }
 
         button {
@@ -60,15 +56,15 @@
         button:hover {
             background-color: #3c445c;
         }
-        
+
         .custom-alert {
-            width: 100%; /* Adjust the width as needed */
+            width: 100%; 
             padding: 10px;
-            text-align: center; /* Center the text horizontally */
+            text-align: center;
         }
 
         .btn-container {
-            text-align: center; /* Center the buttons horizontally */
+            text-align: center; 
         }
     </style>
 </head>
@@ -77,16 +73,16 @@
         <h1>Send Money</h1>
 
         <%
-        	HttpSession transfers = request.getSession();
+            HttpSession transfers = request.getSession();
             int id = (int) transfers.getAttribute("userid");
-			ApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
-	     	WalletImpl walletImpl = (WalletImpl) context.getBean("walletImpl");
+            ApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+            WalletImpl walletImpl = (WalletImpl) context.getBean("walletImpl");
             List<Users> userDetails = walletImpl.readUserDetails(id);
             for(Users user : userDetails) {
         %>
         <form action="AccountTransfer" method="post"> 
-            <label for="recipientName">Recipient Name:</label>
-            <div class="accountNumber-container">
+            <div class="form-group">
+                <label for="recipientName">Recipient Name:</label>
                 <input type="text" id="recipientName" name="recipientName" value="<%= user.getFirstName() %>" required readonly="readonly">
             </div>
         <% } %>
@@ -94,21 +90,25 @@
         <% List<BankAccounts> accountDetails = walletImpl.readAccountDetails(id);
            for(BankAccounts accountInfo : accountDetails) {
         %>
-
-            <label for="recipientWalletID">Recipient AccountNumber:</label>
-            <div class="accountNumber-container">
+            <div class="form-group">
+                <label for="recipientWalletID">Recipient Account Number:</label>
                 <input type="text" id="recipientWalletID" name="recipientAccountNumber" value="<%= accountInfo.getAccNo() %>" required readonly="readonly">
             </div>
         <% } %>
         
-        <label for="amountToSend">Amount to Send:</label>
-        <div class="accountNumber-container">
+        <div class="form-group">
+            <label for="amountToSend">Amount to Send:</label>
             <input type="number" id="amountToSend" name="amountToSend" step="1" min="0" required>
         </div>
 
-        <label for="receiverWalletID">Receiver Wallet ID:</label>
-        <div class="accountNumber-container">
-            <input type="text" id="receiverWalletID" name="receiverWalletID" value="" >
+        <div class="form-group">
+            <label for="receiverWalletID">Receiver Wallet ID:</label>
+            <input type="text" id="receiverWalletID" name="receiverWalletID" value="">
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
         </div>
         
         <div class="btn-container">

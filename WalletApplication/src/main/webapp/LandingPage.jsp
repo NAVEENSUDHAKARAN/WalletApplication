@@ -58,7 +58,7 @@
 		position: relative;
 		width: 55%;
 		height: 90px;
-		left: 5%;
+		left: 10%;
 		gap: 50px;
 	
 	}
@@ -69,14 +69,16 @@
 		font-size: x-large;
 		position: relative;
 		display: flex;
-		width: 90%;
+		width: 60%;
 		height: 50%;
 		gap: 70px;
-		left: 40%;
+		left: 45%;
 		top: 20%;
 		justify-content: space-around;
 		color: #3c445c;
 	}
+	
+
 	
 	#help:hover, #login:hover {
 		cursor: pointer;
@@ -85,9 +87,11 @@
 	
 	#registerBtn {
 		background-color: #3c445c;
+		position:relative;
+		left: 35%;
 		border: none;
 		color: white;
-		width: 30%;
+		width: 60%;
 		height: 50px;
 		padding: 10px 20px;
 		text-align: center;
@@ -122,13 +126,14 @@
 		cursor: pointer;
 		border-radius: 5px;
 	}
+
 	
 	#dropdown{
 		border: none;
 		color: white;
 		width: 100%;
 		height: 50px;
-		padding: 10px 20px;
+		padding: 10px 70px;
 		text-align: center;
 		text-decoration: none;
 		display: inline-block;
@@ -155,6 +160,8 @@
 	#login {
 		text-decoration: none;
 		color: #3c445c;
+		position: relative;
+		left: 15%;
 	}
 	
 	#secondDiv {
@@ -334,7 +341,7 @@
    #profileDiv{
    width: fit-content;
    position: relative;
-   left: 50%;
+   left: 80%;
    }
    
    #walletBalanceDiv{
@@ -512,11 +519,11 @@ opacity: 100%;
 		<div id="optionsDiv">
 			<div id="contentDiv">
 				<a id="help" style="padding-top: 10px;">Help</a> 
-				<a id="login" href="LoginPage.jsp" style="padding-top: 10px;">LogIN</a>
-				
+								
 				<% 
 					if(session.getAttribute("userName") == null){
 				%>
+		<a id="login" href="LoginPage.jsp" style="padding-top: 10px;">LogIN</a>
 		
 		<button id="registerBtn" onclick="window.location.href='Register.jsp'">Register</button>
 				<%} else{  
@@ -543,7 +550,7 @@ opacity: 100%;
 					{ 
 						name = (String) session.getAttribute("userName");
 						%>	
-						<div id="profile" class="container mt-5 ">
+						<div id="profile" class="container mt-5">
 						<div id="profileDiv" class="d-flex justify-content-end ">
 						<div id="dropdown" class="dropdown ">
 							<button class="btn btn-outline-dark dropdown-toggle"
@@ -580,7 +587,7 @@ opacity: 100%;
 			<div id="text1">
 				<h2 id="text1">Make Your</h2>
 				<h2 id="text1">Money Move</h2>
-				<h5 id="text2">Pay online, send money and buy crypto</h5>
+				<h5 id="text2">Pay online, send money</h5>
 				<h5 id="text2">with a digital wallet used by millions.</h5>
 			</div>
 
@@ -653,7 +660,7 @@ opacity: 100%;
             <img src="https://akam.cdn.jdmagicbox.com/images/icontent/newwap/web2022/bharat_billpay.svg" alt="Bills &amp; Recharge Icon">
         </div>
         <p>Pay your bills &amp; recharge instantly with Digipay</p>
-        <a href="">Explore More</a>
+       <!--  <a href="">Explore More</a> -->
     </div>
 
     <div id="billTypes" class="bill-types">
